@@ -1,8 +1,0 @@
-{
-  "name": "ai-story-generator",
-  "version": "1.0.0",
-  "description": "Vercel Serverless API for Gemini",
-  "dependencies": {
-    "node-fetch": "^2.6.1"
-  }
-}
