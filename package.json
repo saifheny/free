@@ -1,14 +1,8 @@
 {
-  "name": "ai-story-generator-backend",
+  "name": "ai-story-generator",
   "version": "1.0.0",
-  "description": "Backend for AI Story Generator",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "description": "Vercel Serverless API for Gemini",
   "dependencies": {
-    "express": "^4.18.2",
-    "node-fetch": "^2.6.1",
-    "cors": "^2.8.5"
+    "node-fetch": "^2.6.1"
   }
 }
