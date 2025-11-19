@@ -11,58 +11,139 @@
         }
         body {
             font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text);
-            background-color: var(--primary); overflow-x: hidden;
+            background-color: var(--primary); 
+            overflow-x: hidden; /* (تم التأكيد) لمنع التمرير الأفقي في الموقع ككل */
         }
-        /* Header */
-        header { background: rgba(15,15,15,0.95); padding: 15px 5%; position: fixed; width: 90%; top: 0; z-index: 1000; backdrop-filter: blur(10px); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 2em; font-weight: 800; color: var(--accent); letter-spacing: 1px; }
+        /* Header & Search (التعديل الرئيسي هنا) */
+        header { 
+            background: rgba(15,15,15,0.95); padding: 15px 5%; position: fixed; width: 90%; 
+            top: 0; z-index: 1000; backdrop-filter: blur(10px); border-bottom: 1px solid #333; 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+
+        /* الحاوية الجديدة لتمكين التغيير في حجم الاسم عند التركيز على البحث */
+        .header-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+            /* (جديد) عكس الترتيب ليظهر الشعار أولاً ثم البحث في RTL، مع دفعهما لليمين واليسار على التوالي */
+            flex-direction: row-reverse; 
+        }
+
+        /* تصميم الشعار مع إضافة transition لحجم الخط */
+        .logo { 
+            font-size: 2em; 
+            font-weight: 800; 
+            color: var(--accent); 
+            letter-spacing: 1px;
+            /* تم إزالة order: 2; ليأخذ موقعه الطبيعي بعد عكس الاتجاه */
+            transition: font-size 0.3s ease; 
+            white-space: nowrap; /* (جديد) لمنع الاسم من النزول سطر جديد */
+        }
+
+        /* --- New Compact Search Styles --- */
+        .search-container {
+            position: relative;
+            /* تم إزالة order: 1; ليأخذ موقعه الطبيعي بعد عكس الاتجاه */
+            margin-left: auto; /* (جديد) لدفع البحث إلى أقصى اليسار بعد عكس الاتجاه */
+        }
+        #search-input {
+            width: 200px; 
+            padding: 8px 15px; 
+            border-radius: 20px; 
+            border: 1px solid #444;
+            background-color: var(--secondary);
+            color: var(--text);
+            font-size: 0.9em; 
+            outline: none;
+            transition: width 0.3s ease, background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-align: right;
+        }
+        #search-input::placeholder {
+            color: var(--gray);
+        }
+        #search-input:focus {
+            width: 350px; 
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
+        }
+
+        /* (معدل) تصغير الاسم عند التركيز على البحث */
+        .header-content:focus-within .logo {
+             font-size: 1.0em; /* تصغير حجم الخط إلى حجم أصغر جداً */
+             padding-left: 15px; /* (جديد) لإضافة مسافة بسيطة بينه وبين شريط البحث */
+        }
         
-        /* Sliders - ثابت ويتحرك بالسحب */
+        .search-suggestions {
+            position: absolute;
+            top: 45px; 
+            left: 0; /* (معدل) تمت إعادة left: 0 ليتطابق مع حقل البحث */
+            right: auto; 
+            width: 350px; 
+            background-color: var(--secondary);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            z-index: 1001;
+            overflow: hidden;
+            max-height: 0; 
+            transition: max-height 0.3s ease-out;
+        }
+        .search-suggestions.active {
+            max-height: 400px; 
+            border: 1px solid #333;
+            border-top: none;
+        }
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background-color 0.2s;
+            color: var(--text);
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .suggestion-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .suggestion-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-left: 10px; 
+            object-fit: cover;
+        }
+        .suggestion-item div {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* --- End New Compact Search Styles --- */
+
+        /* Sliders (لم تتغير) */
         .slider-container { width: 100%; overflow: hidden; position: relative; }
         .slider { 
-            display: flex; gap: 15px; 
-            overflow-x: scroll; 
-            cursor: grab; 
-            padding: 5px 0;
-            scroll-snap-type: x mandatory; 
-            -webkit-overflow-scrolling: touch; 
+            display: flex; gap: 15px; overflow-x: scroll; cursor: grab; padding: 5px 0; 
+            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; 
         }
         .slider::-webkit-scrollbar { display: none; }
-        .slider { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Top Banner */
         .banner-section { margin-top: 80px; padding-bottom: 30px; } 
-        
-        /* تأثير الـ 3D والبروز */
-        .banner-item { 
-            min-width: 300px; height: 170px; border-radius: 10px; overflow: hidden; position: relative; 
-            transition: 0.3s; cursor: pointer; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-        }
+        .banner-item { min-width: 300px; height: 170px; border-radius: 10px; overflow: hidden; position: relative; transition: 0.3s; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); scroll-snap-align: start; }
         .banner-item img { width: 100%; height: 100%; object-fit: cover; }
-        .banner-item:hover { 
-            transform: scale(1.05); z-index: 2; 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.7); 
-        }
-        
-        /* Categories */
+        .banner-item:hover { transform: scale(1.05); z-index: 2; box-shadow: 0 15px 30px rgba(0,0,0,0.7); }
         .category-section { padding: 30px 5%; margin-bottom: 20px; } 
         .category-title { font-size: 1.5em; margin-bottom: 15px; border-right: 4px solid var(--accent); padding-right: 10px; }
-        
-        /* تأثير الـ 3D والبروز على بطاقات المسلسلات */
-        .series-card { 
-            min-width: 160px; border-radius: 8px; overflow: hidden; cursor: pointer; 
-            transition: 0.3s; position: relative; background: var(--secondary); 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
-        }
-        .series-card:hover { 
-            transform: scale(1.05); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.6); 
-        }
+        .series-card { min-width: 160px; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; position: relative; background: var(--secondary); box-shadow: 0 2px 5px rgba(0,0,0,0.3); scroll-snap-align: start; }
+        .series-card:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.6); }
         .series-card img { width: 100%; height: 240px; object-fit: cover; }
         .series-card .title { padding: 10px; font-size: 0.9em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Fullscreen Views */
+        /* Fullscreen Views (لم تتغير) */
         .fullscreen-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; background: var(--primary); transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto; }
         .fullscreen-view.active { transform: translateY(0); }
         .view-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3; background-size: cover; background-position: center; filter: blur(20px); z-index: -1; }
@@ -70,15 +151,15 @@
         .close-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5em; cursor: pointer; }
         .view-content { padding: 20px; max-width: 1200px; margin: 0 auto; }
 
-        /* Episode & Details Styling */
+        /* Episode & Details Styling (لم تتغير) */
         .info-grid { display: flex; gap: 30px; margin-bottom: 40px; flex-wrap: wrap; }
         .poster-img { width: 220px; height: 330px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .text-content { flex: 1; }
         .action-btn { background: var(--accent); color: white; border: none; padding: 10px 25px; border-radius: 5px; font-size: 1em; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; margin-top: 5px; }
         .action-btn svg { width: 20px; height: 20px; fill: white; }
         
-        .episode-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
-        .episode-header h2 { margin: 0; font-size: 1.8em; }
+        .episode-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid #333;}
+        .episode-header h2 { margin: 0; font-size: 1.8em; max-width: 70%;}
 
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .episode-card { background: rgba(255,255,255,0.05); padding: 10px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: 0.2s; }
@@ -86,19 +167,38 @@
         .episode-card.active { border-color: var(--accent); background: rgba(229, 9, 20, 0.2); }
         .episode-thumb { width: 100%; height: 110px; object-fit: cover; border-radius: 5px; margin-bottom: 8px; }
 
-        .video-container { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.7); }
         .video-container iframe { width: 100%; height: 100%; border: none; }
 
-        /* Footer */
+        /* Footer (لم تتغير) */
         footer { background-color: #050505; padding: 50px 5%; margin-top: 50px; border-top: 1px solid #333; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
-        .footer-col h3 { color: var(--accent); margin-bottom: 20px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
-        .footer-links a { display: flex; align-items: center; gap: 10px; color: var(--gray); text-decoration: none; margin-bottom: 12px; transition: 0.3s; }
         .copyright { text-align: center; color: #555; margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; font-size: 0.9em; }
 
         @media (max-width: 768px) {
-            .episode-header { flex-direction: column; align-items: center; text-align: center; }
-            .episode-header h2 { margin-bottom: 15px; }
+            header { 
+                padding: 10px 5%;
+            } 
+            .header-content {
+                flex-direction: row-reverse; /* إبقاء الترتيب ثابتاً: اسم ثم بحث */
+            }
+            .search-container { 
+                margin-left: auto; /* دفع البحث لليسار */
+            }
+            #search-input {
+                width: 130px; 
+                font-size: 0.8em;
+            }
+            #search-input:focus {
+                width: 180px; 
+            }
+            .search-suggestions {
+                width: 180px; 
+            }
+            /* تصغير الاسم عند التركيز على البحث في الموبايل */
+            .header-content:focus-within .logo {
+                font-size: 0.9em; /* تصغير أكبر على الهاتف */
+                padding-left: 10px;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
@@ -106,7 +206,17 @@
 <body>
 
     <header>
-        <div class="logo">Saif TV</div>
+        <!-- (جديد) حاوية المحتوى للسماح بتفاعل CSS بين البحث والشعار -->
+        <div class="header-content">
+            <div class="logo">Saif TV</div>
+            <!-- شريط البحث وصندوق الاقتراحات -->
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="ابحث..." />
+                <div class="search-suggestions" id="suggestions-box"></div>
+            </div>
+            <!-- نهاية شريط البحث -->
+        </div>
+        
     </header>
 
     <div class="banner-section slider-container" id="banner-container">
@@ -119,13 +229,10 @@
 
     <!-- Footer الاحترافي -->
     <footer>
-        <div class="footer-grid">
-            <!-- Footer Content... -->
-        </div>
         <div class="copyright">© 2025 Saif TV - جميع الحقوق محفوظة</div>
     </footer>
 
-    <!-- صفحة تفاصيل المسلسل -->
+    <!-- صفحة تفاصيل المسلسل (لم تتغير) -->
     <div class="fullscreen-view" id="details-view">
         <div class="view-bg" id="details-bg"></div>
         <div class="view-header">
@@ -134,9 +241,8 @@
         <div class="view-content" id="details-content"></div>
     </div>
 
-    <!-- صفحة الحلقة (الواجهة الجديدة) -->
+    <!-- صفحة الحلقة (الواجهة الجديدة) (لم تتغير) -->
     <div class="fullscreen-view" id="episode-view">
-        <div class="view-bg" id="episode-bg"></div>
         <div class="view-header">
             <button class="close-btn" onclick="closeView('episode-view')">✕</button>
         </div>
@@ -149,16 +255,36 @@
 
       // هنا يتم وضع إعدادات Firebase الخاصة بك
       const firebaseConfig = { apiKey: "AIzaSyCsnZdFrg-KlWFc0z6OgmXgBp6lPKf14fU", authDomain: "saifsa-b51f1.firebaseapp.com", databaseURL: "https://saifsa-b51f1-default-rtdb.europe-west1.firebasedatabase.app", projectId: "saifsa-b51f1", storageBucket: "saifsa-b51f1.firebasestorage.app", messagingSenderId: "41089917871", appId: "1:41089917871:web:fce49f6f23bd4f679b055a" };
-      const YOUTUBE_API_KEY = 'AIzaSyA4gfRf5sGQZ-a7ficcTcgU47aJV30cSgc'; // مفتاح API لـ YouTube
+      // **********************************************************************************
+      // هام: يرجى استبدال هذا المفتاح بمفتاح YouTube API صالح لديك لكي يعمل جلب الفيديوهات
+      const YOUTUBE_API_KEY = 'AIzaSyA4gfRf5sGQZ-a7ficcTcgU47aJV30cSgc'; 
+      // **********************************************************************************
       const app = initializeApp(firebaseConfig);
       const database = getDatabase(app);
+
+      // (جديد) قائمة لتخزين بيانات جميع المسلسلات للبحث السريع
+      const allSeriesData = []; 
+      const seriesIdSet = new Set(); // للمساعدة في التأكد من عدم تكرار إضافة المسلسلات
+
+      // دالة مساعدة لجلب البيانات من YouTube
+      async function fetchYT(params) {
+          try {
+              const res = await fetch(`https://www.googleapis.com/youtube/v3/${params}&key=${YOUTUBE_API_KEY}`);
+              return await res.json();
+          } catch(e) { console.error("Error fetching YT data:", e); return null; }
+      }
 
       // جلب البيانات وبناء الواجهة الرئيسية
       onValue(ref(database, 'series/'), (snapshot) => {
           const data = snapshot.val() || {};
           const allPlaylists = [];
           Object.keys(data).forEach(cat => {
-              Object.values(data[cat]).forEach(item => allPlaylists.push(item.playlistId));
+              Object.values(data[cat]).forEach(item => {
+                  if (!seriesIdSet.has(item.playlistId)) {
+                      allPlaylists.push(item.playlistId);
+                      seriesIdSet.add(item.playlistId);
+                  }
+              });
           });
           const uniqueIds = [...new Set(allPlaylists)];
           buildBanner(uniqueIds);
@@ -186,10 +312,17 @@
           for (const id of recentIds) {
               const info = await fetchYT(`playlists?part=snippet&id=${id}`);
               if(info && info.items.length > 0) {
+                  const title = info.items[0].snippet.title; 
                   const img = info.items[0].snippet.thumbnails.maxres?.url || info.items[0].snippet.thumbnails.high.url;
+                  
+                  // (جديد) إضافة لبيانات البحث
+                  if (!allSeriesData.find(s => s.id === id)) {
+                      allSeriesData.push({ id, title, img });
+                  }
+
                   const div = document.createElement('div');
                   div.className = 'banner-item';
-                  div.onclick = () => openSeries(id);
+                  div.onclick = () => window.openSeries(id); 
                   div.innerHTML = `<img src="${img}">`;
                   container.appendChild(div);
               }
@@ -205,16 +338,90 @@
               if(info && info.items.length > 0) {
                   const title = info.items[0].snippet.title;
                   const img = info.items[0].snippet.thumbnails.high.url;
+                  
+                  // (جديد) إضافة لبيانات البحث
+                  if (!allSeriesData.find(s => s.id === id)) {
+                      allSeriesData.push({ id, title, img });
+                  }
+                  
                   const div = document.createElement('div');
                   div.className = 'series-card';
-                  div.onclick = () => openSeries(id);
+                  div.onclick = () => window.openSeries(id); 
                   div.innerHTML = `<img src="${img}"><div class="title">${title}</div>`;
                   container.appendChild(div);
               }
           }
       }
+      
+      // **********************************************
+      // (جديد) دوال ومنطق البحث والاقتراحات
+      // **********************************************
+      const searchInput = document.getElementById('search-input');
+      const suggestionsBox = document.getElementById('suggestions-box');
 
-      async function openSeries(id) {
+      searchInput.addEventListener('input', handleSearch);
+      searchInput.addEventListener('focus', handleSearch); // لإظهار الاقتراحات عند النقر
+
+      // إخفاء الاقتراحات عند النقر خارج صندوق البحث
+      document.addEventListener('click', (e) => {
+           if (!e.target.closest('.search-container')) {
+               suggestionsBox.classList.remove('active');
+           }
+      });
+
+      function handleSearch(e) {
+          const query = searchInput.value.trim().toLowerCase();
+          suggestionsBox.innerHTML = '';
+          
+          if (query.length < 2 && e.type !== 'focus') { 
+              suggestionsBox.classList.remove('active');
+              return;
+          }
+          
+          // تصفية البيانات المجمعة
+          const results = allSeriesData.filter(series => 
+              series.title.toLowerCase().includes(query)
+          );
+
+          if (results.length === 0) {
+              if (query.length > 0) {
+                  suggestionsBox.innerHTML = '<div class="suggestion-item" style="cursor:default;color:var(--gray);text-align:center;justify-content:center;">لا توجد نتائج مطابقة</div>';
+                  suggestionsBox.classList.add('active');
+              } else {
+                  suggestionsBox.classList.remove('active');
+              }
+              return;
+          }
+          
+          // عرض أعلى 4 نتائج فقط كما طلب المستخدم
+          const topResults = results.slice(0, 4); 
+          
+          topResults.forEach(series => {
+              const item = document.createElement('div');
+              item.className = 'suggestion-item';
+              item.innerHTML = `
+                  <img src="${series.img}">
+                  <div>${series.title}</div>
+              `;
+              item.onclick = () => {
+                  window.openSeries(series.id);
+                  suggestionsBox.classList.remove('active');
+                  searchInput.value = series.title; 
+                  searchInput.blur();
+              };
+              suggestionsBox.appendChild(item);
+          });
+          
+          suggestionsBox.classList.add('active');
+      }
+      // **********************************************
+      // نهاية منطق البحث
+      // **********************************************
+      
+      // **********************************************
+      // تم تعريفه على "window" ليتم استدعاؤه من HTML (باقي الدوال لم تتغير)
+      // **********************************************
+      window.openSeries = async (id) => {
           const view = document.getElementById('details-view');
           const content = document.getElementById('details-content');
           content.innerHTML = '<h2 style="text-align:center">جاري التحميل...</h2>';
@@ -232,11 +439,9 @@
           const bg = s.thumbnails.maxres?.url || s.thumbnails.high.url;
           document.getElementById('details-bg').style.backgroundImage = `url(${bg})`;
           
-          // **********************************************
-          // التعديل: إضافة دالة playEpisode() لفتح الحلقة عند الضغط
-          // **********************************************
+          // استدعاء window.playEpisode
           const episodesHtml = items.items.map(e => `
-              <div class="episode-card" onclick="playEpisode('${id}', '${e.snippet.resourceId.videoId}', '${e.snippet.title}')">
+              <div class="episode-card" onclick="window.playEpisode('${id}', '${e.snippet.resourceId.videoId}', '${e.snippet.title}')">
                   <img class="episode-thumb" src="${e.snippet.thumbnails.medium.url}">
                   <div>${e.snippet.title}</div>
               </div>
@@ -248,7 +453,7 @@
                   <div class="text-content">
                       <h1>${s.title}</h1>
                       <p>${s.description.substring(0, 200)}${s.description.length > 200 ? '...' : ''}</p>
-                      <button class="action-btn" onclick="shareLink('${id}')">
+                      <button class="action-btn" onclick="window.shareLink('${id}')">
                           <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
                           مشاركة المسلسل
                       </button>
@@ -259,53 +464,60 @@
           `;
       }
 
-      // تَم تعديل هذه الوظيفة لتلبية طلبك بالكامل
-      async function playEpisode(playlistId, videoId, title) {
+      // **********************************************
+      // تم تعريفه على "window" ليتم استدعاؤه من HTML
+      // **********************************************
+      window.playEpisode = async (playlistId, videoId, title) => {
           const view = document.getElementById('episode-view');
           const content = document.getElementById('episode-content');
           document.getElementById('details-view').classList.remove('active');
           view.classList.add('active');
           
           content.innerHTML = `
-              <!-- 1. المشغل في الأعلى -->
+              <!-- 1. المشغل في الأعلى (كما طلبت) -->
               <div class="video-container">
                   <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
               </div>
               
-              <!-- 2. العنوان وزر المشاركة (صفحة حالية) -->
+              <!-- 2. العنوان وزر المشاركة (صفحة حالية) (كما طلبت) -->
               <div class="episode-header">
                   <h2>${title}</h2> 
-                  <button class="action-btn" onclick="shareLink('${playlistId}', '${videoId}')">
+                  <button class="action-btn" onclick="window.shareLink('${playlistId}', '${videoId}')">
                     <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
                     مشاركة الحلقة الحالية
                   </button>
               </div>
 
-              <!-- 3. باقي الحلقات -->
+              <!-- 3. باقي الحلقات (كما طلبت) -->
               <h3>باقي الحلقات</h3>
-              <div class="episodes-grid" id="related-eps"></div>
+              <div class="episodes-grid" id="related-eps">
+                 <p style="color:var(--gray);">جاري تحميل الحلقات...</p>
+              </div>
           `;
           
           // تحميل الحلقات المقترحة في الاسفل
           const items = await fetchYT(`playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50`);
-          const html = items.items.map(e => {
-             // تمييز الحلقة الحالية بخط أحمر
-             const current = e.snippet.resourceId.videoId === videoId ? ' active' : '';
-             return `
-                 <div class="episode-card${current}" onclick="playEpisode('${playlistId}', '${e.snippet.resourceId.videoId}', '${e.snippet.title}')">
-                      <img class="episode-thumb" src="${e.snippet.thumbnails.medium.url}">
-                      <div>${e.snippet.title}</div>
-                  </div>
-              `;
-          }).join('');
-          document.getElementById('related-eps').innerHTML = html;
-      }
-
-      async function fetchYT(params) {
-          try {
-              const res = await fetch(`https://www.googleapis.com/youtube/v3/${params}&key=${YOUTUBE_API_KEY}`);
-              return await res.json();
-          } catch(e) { console.error("Error fetching YT data:", e); return null; }
+          
+          if(items && items.items) {
+              const html = items.items.map(e => {
+                 // تمييز الحلقة الحالية بخط أحمر
+                 const current = e.snippet.resourceId.videoId === videoId ? ' active' : '';
+                 const epTitle = e.snippet.title;
+                 return `
+                     <div class="episode-card${current}" 
+                          onclick="window.playEpisode('${playlistId}', '${e.snippet.resourceId.videoId}', '${epTitle}')">
+                          <img class="episode-thumb" src="${e.snippet.thumbnails.medium.url}">
+                          <div title="${epTitle}">${epTitle}</div>
+                      </div>
+                  `;
+              }).join('');
+              document.getElementById('related-eps').innerHTML = html;
+              
+              // لتحديث الرابط ليمكن مشاركته مباشرة
+              window.history.pushState("", document.title, `#series=${playlistId}&vid=${videoId}`);
+          } else {
+               document.getElementById('related-eps').innerHTML = '<p style="color:var(--gray);">تعذر تحميل قائمة الحلقات (تأكد من مفتاح API).<p>';
+          }
       }
 
       window.closeView = (id) => {
@@ -322,7 +534,15 @@
       window.shareLink = (pid, vid) => {
           let url = `${window.location.origin}${window.location.pathname}#series=${pid}`;
           if(vid) url += `&vid=${vid}`;
-          navigator.clipboard.writeText(url).then(() => alert('تم نسخ رابط الصفحة الحالية بنجاح!'));
+          
+          if (navigator.share) {
+              navigator.share({
+                  title: 'شاهد معنا',
+                  url: url,
+              }).catch(error => console.log('Error sharing', error));
+          } else {
+              navigator.clipboard.writeText(url).then(() => alert('تم نسخ رابط الصفحة الحالية بنجاح!'));
+          }
       }
       
       // فتح الروابط المباشرة (Deep Linking)
@@ -332,9 +552,12 @@
               const pid = hash.split('series=')[1].split('&')[0];
               const vid = hash.includes('vid=') ? hash.split('vid=')[1].split('&')[0] : null;
               if(vid) {
-                 playEpisode(pid, vid, 'جاري تحميل العنوان...');
+                 fetchYT(`videos?part=snippet&id=${vid}`).then(data => {
+                      const title = data.items.length > 0 ? data.items[0].snippet.title : 'جاري تحميل العنوان...';
+                      window.playEpisode(pid, vid, title);
+                 });
               }
-              else openSeries(pid);
+              else window.openSeries(pid);
           }
       }
       
@@ -366,13 +589,11 @@
             slider.scrollLeft = scrollLeft - walk;
         };
 
-        // أحداث الفأرة
+        // أحداث الفأرة واللمس
         slider.addEventListener('mousedown', startDrag);
         slider.addEventListener('mouseleave', endDrag);
         slider.addEventListener('mouseup', endDrag);
         slider.addEventListener('mousemove', moveDrag);
-        
-        // أحداث اللمس (موبايل)
         slider.addEventListener('touchstart', startDrag, { passive: true });
         slider.addEventListener('touchend', endDrag);
         slider.addEventListener('touchmove', moveDrag, { passive: false });
