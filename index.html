@@ -3,329 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saif TV - سيف تي في</title>
+    <title>Saif TV</title>
     <style>
         :root {
-            --primary-color: #0f0f0f; --secondary-color: #222222;
-            --text-color: #ffffff; --accent-color: #e50914;
+            --primary: #0f0f0f; --secondary: #1f1f1f;
+            --text: #ffffff; --accent: #e50914; --gray: #b3b3b3;
         }
         body {
-            font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text-color);
-            background-color: var(--primary-color);
-            background-image: url('https://www.transparenttextures.com/patterns/dark-circles.png');
-            overflow-x: hidden;
+            font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text);
+            background-color: var(--primary); overflow-x: hidden;
         }
-        /* --- Header --- */
-        header { background-color: rgba(15, 15, 15, 0.85); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; width: 90%; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .logo { font-size: 2.5em; font-weight: bold; color: var(--accent-color); }
-        .nav-links a { color: var(--text-color); text-decoration: none; margin: 0 15px; font-size: 1.1em; transition: color 0.3s; }
-        .nav-links a:hover { color: var(--accent-color); }
-
-        /* --- Main Banner & Category Sliders --- */
-        .slider-container { width: 100%; overflow: hidden; cursor: grab; }
-        .slider-container:active { cursor: grabbing; }
-        .slider { display: flex; }
-        .banner-container { margin-top: 100px; padding: 20px 0; }
-        .banner-slider { animation: banner-slide 40s linear infinite; }
-        .banner-slider:hover, .series-carousel:hover { animation-play-state: paused; }
-        .banner-item { flex-shrink: 0; width: 600px; margin: 0 10px; border-radius: 15px; overflow: hidden; cursor: pointer; }
-        .banner-item img { width: 100%; height: 340px; object-fit: cover; display: block; }
-        .category-section { padding: 20px 0; }
-        .category-title { font-size: 1.8em; font-weight: bold; margin: 0 5% 15px; }
-        .series-carousel-container { padding: 0 5%; }
-        .series-card-small { flex-shrink: 0; width: 170px; margin-left: 15px; transition: transform 0.2s; cursor: pointer; }
-        .series-card-small:hover { transform: scale(1.08); }
-        .series-card-small img { width: 100%; height: 250px; object-fit: cover; border-radius: 12px; }
-        .series-card-small .title { padding: 8px; text-align: center; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        @keyframes banner-slide { from { transform: translateX(0%); } to { transform: translateX(-100%); } }
-
-        /* --- Fullscreen Views (Details & Episode) --- */
-        .fullscreen-view {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
-            transform: translateX(100%); transition: transform 0.4s ease-in-out;
-            overflow-y: auto; background-color: var(--primary-color);
+        /* Header */
+        header { background: rgba(15,15,15,0.95); padding: 15px 5%; position: fixed; width: 90%; top: 0; z-index: 1000; backdrop-filter: blur(10px); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 2em; font-weight: 800; color: var(--accent); letter-spacing: 1px; }
+        
+        /* Sliders - التعديل لجعل الحركة يدوية وإخفاء شريط التمرير */
+        .slider-container { width: 100%; overflow: hidden; position: relative; }
+        .slider { 
+            display: flex; gap: 15px; 
+            overflow-x: scroll; /* لجعل السحب يدوياً */
+            cursor: grab; /* مؤشر السحب */
+            padding: 5px 0;
+            scroll-snap-type: x mandatory; /* لتحسين تجربة التمرير */
+            -webkit-overflow-scrolling: touch; /* لتحسين التمرير على iOS */
         }
-        .fullscreen-view.active { transform: translateX(0); }
-        .view-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(10px) brightness(0.4); z-index: -1; }
-        .view-header { padding: 20px; display: flex; align-items: center; background: rgba(0,0,0,0.5); }
-        .back-button { font-size: 2em; cursor: pointer; margin-left: 20px; }
-        .view-content { padding: 20px; }
+        /* إخفاء شريط التمرير */
+        .slider::-webkit-scrollbar { display: none; }
+        .slider { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Top Banner - إيقاف الحركة التلقائية */
+        .banner-section { margin-top: 80px; padding-bottom: 30px; } /* زيادة مسافة الفصل */
         
-        /* Details View Specifics */
-        .series-main-info { display: flex; gap: 25px; flex-wrap: wrap; }
-        .series-main-info img { width: 220px; height: 330px; border-radius: 10px; object-fit: cover; }
-        .series-main-info .text-info { flex: 1; }
-        .series-main-info h1 { font-size: 2.5em; margin: 0 0 15px; }
-        .episode-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; cursor: pointer; }
-        .episode-item img { width: 160px; height: 90px; border-radius: 5px; object-fit: cover; }
-        .episode-item span { font-size: 1.1em; }
+        /* تأثير الـ 3D والبروز */
+        .banner-item { 
+            min-width: 300px; height: 170px; border-radius: 10px; overflow: hidden; position: relative; 
+            transition: 0.3s; cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* ظل خفيف دائم */
+        }
+        .banner-item img { width: 100%; height: 100%; object-fit: cover; }
+        .banner-item:hover { 
+            transform: scale(1.05); z-index: 2; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.7); /* ظل بارز عند التحريك (3D) */
+        }
         
-        /* Episode View Specifics */
-        .video-player-container { width: 100%; max-width: 900px; margin: 0 auto 20px; aspect-ratio: 16 / 9; }
-        .video-player-container iframe { width: 100%; height: 100%; border-radius: 10px; }
-        .episode-info { text-align: center; margin-bottom: 30px; }
-        .related-episodes-list .related-item { padding: 12px; background: rgba(0,0,0,0.3); border-radius: 5px; margin-bottom: 8px; }
-        .recommendations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; margin-top: 30px; }
+        /* Categories - زيادة المسافات بين الأقسام */
+        .category-section { padding: 30px 5%; margin-bottom: 20px; } /* مسافة أكبر */
+        .category-title { font-size: 1.5em; margin-bottom: 15px; border-right: 4px solid var(--accent); padding-right: 10px; }
         
-        /* --- Footer --- */
-        footer { background: #1a1a1a; padding: 40px 5%; margin-top: 30px; color: #aaa; }
-        .footer-content { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 30px; }
-        .footer-section { flex: 1; min-width: 250px; }
-        .footer-section h3 { color: white; margin-bottom: 15px; }
-        .footer-section a { color: var(--accent-color); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-        .copyright { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; }
+        /* تأثير الـ 3D والبروز على بطاقات المسلسلات */
+        .series-card { 
+            min-width: 160px; border-radius: 8px; overflow: hidden; cursor: pointer; 
+            transition: 0.3s; position: relative; background: var(--secondary); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* ظل خفيف دائم */
+        }
+        .series-card:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6); /* ظل بارز عند التحريك (3D) */
+        }
+        .series-card img { width: 100%; height: 240px; object-fit: cover; }
+        .series-card .title { padding: 10px; font-size: 0.9em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Fullscreen Views */
+        .fullscreen-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; background: var(--primary); transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto; }
+        .fullscreen-view.active { transform: translateY(0); }
+        .view-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3; background-size: cover; background-position: center; filter: blur(20px); z-index: -1; }
+        .view-header { padding: 20px; display: flex; justify-content: flex-end; }
+        .close-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5em; cursor: pointer; }
+        .view-content { padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+        /* Episode & Details Styling */
+        .info-grid { display: flex; gap: 30px; margin-bottom: 40px; flex-wrap: wrap; }
+        .poster-img { width: 220px; height: 330px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .text-content { flex: 1; }
+        .action-btn { background: var(--accent); color: white; border: none; padding: 10px 25px; border-radius: 5px; font-size: 1em; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; margin-top: 15px; }
+        .action-btn svg { width: 20px; height: 20px; fill: white; }
         
-        /* --- Mobile Responsive --- */
+        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .episode-card { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .episode-card:hover { background: rgba(255,255,255,0.1); }
+        .episode-thumb { width: 100%; height: 110px; object-fit: cover; border-radius: 5px; margin-bottom: 8px; }
+
+        .video-container { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+        .video-container iframe { width: 100%; height: 100%; border: none; }
+
+        /* Footer (Professional) */
+        footer { background-color: #050505; padding: 50px 5%; margin-top: 50px; border-top: 1px solid #333; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
+        .footer-col h3 { color: var(--accent); margin-bottom: 20px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .footer-col h3 svg { width: 24px; height: 24px; fill: var(--accent); }
+        .footer-links a { display: flex; align-items: center; gap: 10px; color: var(--gray); text-decoration: none; margin-bottom: 12px; transition: 0.3s; }
+        .footer-links a svg { width: 18px; height: 18px; fill: var(--gray); transition: 0.3s; }
+        .footer-links a:hover { color: white; }
+        .footer-links a:hover svg { fill: var(--accent); }
+        .copyright { text-align: center; color: #555; margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; font-size: 0.9em; }
+
         @media (max-width: 768px) {
-            .logo { font-size: 1.8em; } .nav-links { display: none; }
-            .banner-item { width: 90vw; } .banner-item img { height: 200px; }
-            .series-card-small { width: 140px; } .series-card-small img { height: 200px; }
-            .series-main-info, .episode-item { flex-direction: column; } .series-main-info img { width: 100%; height: auto; }
-            .recommendations-grid { grid-template-columns: repeat(2, 1fr); } /* 2 columns on mobile */
+            .banner-item { min-width: 250px; height: 140px; }
+            .info-grid { flex-direction: column; align-items: center; text-align: center; }
+            .episodes-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-links a { justify-content: center; }
+            .footer-col h3 { justify-content: center; }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header><div class="logo">Saif TV</div></header>
+    <header>
+        <div class="logo">Saif TV</div>
+    </header>
+
+    <!-- البانر العلوي (الآن ثابت ويتحرك بالسحب) -->
+    <div class="banner-section slider-container" id="banner-container">
+        <div class="slider" id="banner-content"></div>
+    </div>
 
     <main id="main-content">
-        <section class="banner-container slider-container" id="banner-container">
-            <div class="banner-slider slider" id="banner-slider-content"></div>
-        </section>
+        <!-- الأقسام ستظهر هنا -->
     </main>
 
-    <div class="fullscreen-view" id="details-view">
-        <div class="view-background" id="details-view-background"></div>
-        <div class="view-header"><span class="back-button" id="back-button-details">➡️</span></div>
-        <div class="view-content" id="details-content-container"></div>
-    </div>
-    
-    <div class="fullscreen-view" id="episode-view">
-        <div class="view-background" id="episode-view-background"></div>
-        <div class="view-header"><span class="back-button" id="back-button-episode">➡️</span></div>
-        <div class="view-content" id="episode-content-container"></div>
-    </div>
-
+    <!-- Footer الاحترافي -->
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>عن Saif TV</h3>
-                <p>موقع سيف تي في هو وجهتك الأولى لمشاهدة أحدث المسلسلات العربية والعالمية بجودة عالية.</p>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h3>
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                    عن الموقع
+                </h3>
+                <p style="color: var(--gray); line-height: 1.6;">موقع سيف تي في يقدم أحدث المسلسلات بجودة عالية. نحن نسعى لتوفير تجربة مشاهدة ممتعة وسلسة لجميع المستخدمين على كافة الأجهزة.</p>
             </div>
-            <div class="footer-section">
-                <h3>روابط مهمة</h3>
-                <p><a href="#">📜 سياسة الخصوصية</a></p>
-                <p><a href="#">⚖️ شروط الاستخدام</a></p>
-                <p><a href="#">©️ حقوق النشر (DMCA)</a></p>
+            <div class="footer-col">
+                <h3>
+                    <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                    روابط سريعة
+                </h3>
+                <div class="footer-links">
+                    <a href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> سياسة الخصوصية</a>
+                    <a href="#"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg> شروط الاستخدام</a>
+                    <a href="#"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/></svg> حقوق الملكية</a>
+                </div>
             </div>
-            <div class="footer-section">
-                <h3>تواصل معنا</h3>
-                <p>للاستفسارات أو الإبلاغ عن مشكلة:</p>
-                <p><a href="https://wa.me/YOUR_WHATSAPP_NUMBER" target="_blank">
-                    <svg height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.37 21.82 12.04 21.82C17.5 21.82 21.95 17.37 21.95 11.91C21.95 6.45 17.5 2 12.04 2M12.04 3.67C16.56 3.67 20.28 7.38 20.28 11.91C20.28 16.44 16.56 20.15 12.04 20.15C10.56 20.15 9.14 19.78 7.9 19.09L7.54 18.88L4.32 19.8L5.26 16.68L5.04 16.3C4.32 15.05 3.8 13.53 3.8 11.91C3.8 7.38 7.52 3.67 12.04 3.67M16.57 14.45C16.31 14.71 15.35 15.24 15.08 15.37C14.82 15.5 14.49 15.53 14.2 15.37C13.91 15.21 13.04 14.92 12.03 14C10.82 12.89 10.15 11.64 9.96 11.35C9.77 11.06 9.89 10.92 10.04 10.77C10.17 10.64 10.32 10.46 10.46 10.3C10.6 10.14 10.66 10.01 10.8 9.78C10.94 9.55 10.88 9.32 10.81 9.2C10.75 9.08 10.27 7.82 10.06 7.34C9.85 6.86 9.64 6.91 9.48 6.91C9.31 6.91 9.04 6.91 8.78 6.91C8.52 6.91 8.1 6.97 7.77 7.29C7.44 7.61 6.78 8.24 6.78 9.43C6.78 10.62 7.8 11.75 7.94 11.91C8.08 12.07 9.77 14.64 12.33 15.79C14.15 16.59 14.89 16.29 15.38 16.23C15.87 16.17 16.75 15.65 16.94 15.06C17.13 14.47 17.13 13.98 17.07 13.89C17 13.8 16.83 13.74 16.57 13.48" /></svg>
-                    تواصل عبر واتساب
-                </a></p>
+            <div class="footer-col">
+                <h3>
+                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>
+                    تواصل معنا
+                </h3>
+                <div class="footer-links">
+                    <a href="https://wa.me/" target="_blank">
+                        <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.2 4.74 1.2 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.91-9.91-9.91z"/></svg>
+                        واتساب
+                    </a>
+                    <a href="#">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z"/></svg>
+                        فيسبوك
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="copyright">&copy; 2025 Saif TV. جميع الحقوق محفوظة.</div>
+        <div class="copyright">© 2025 Saif TV - جميع الحقوق محفوظة</div>
     </footer>
 
+    <!-- صفحة تفاصيل المسلسل -->
+    <div class="fullscreen-view" id="details-view">
+        <div class="view-bg" id="details-bg"></div>
+        <div class="view-header">
+            <button class="close-btn" onclick="closeView('details-view')">✕</button>
+        </div>
+        <div class="view-content" id="details-content"></div>
+    </div>
+
+    <!-- صفحة الحلقة -->
+    <div class="fullscreen-view" id="episode-view">
+        <div class="view-bg" id="episode-bg"></div>
+        <div class="view-header">
+            <button class="close-btn" onclick="closeView('episode-view')">✕</button>
+        </div>
+        <div class="view-content" id="episode-content"></div>
+    </div>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
       import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-      // --- CONFIG & GLOBAL VARS ---
       const firebaseConfig = { apiKey: "AIzaSyCsnZdFrg-KlWFc0z6OgmXgBp6lPKf14fU", authDomain: "saifsa-b51f1.firebaseapp.com", databaseURL: "https://saifsa-b51f1-default-rtdb.europe-west1.firebasedatabase.app", projectId: "saifsa-b51f1", storageBucket: "saifsa-b51f1.firebasestorage.app", messagingSenderId: "41089917871", appId: "1:41089917871:web:fce49f6f23bd4f679b055a" };
       const YOUTUBE_API_KEY = 'AIzaSyA4gfRf5sGQZ-a7ficcTcgU47aJV30cSgc';
       const app = initializeApp(firebaseConfig);
       const database = getDatabase(app);
-      let seriesDataCache = {}; // Cache to store all series data by category
+      let seriesCache = {};
 
-      // --- DOM ELEMENTS ---
-      const mainContent = document.getElementById('main-content');
-      const bannerSliderContent = document.getElementById('banner-slider-content');
-      const detailsView = document.getElementById('details-view');
-      const episodeView = document.getElementById('episode-view');
-      
-      // --- CORE LOGIC ---
-      function fetchSeriesFromFirebase() {
-        onValue(ref(database, 'series/'), (snapshot) => {
-            document.querySelectorAll('.category-section').forEach(el => el.remove());
-            bannerSliderContent.innerHTML = '';
-            seriesDataCache = snapshot.val() || {};
-            
-            if (Object.keys(seriesDataCache).length > 0) {
-                let allPlaylistIds = [];
-                for (const categoryName in seriesDataCache) {
-                    allPlaylistIds.push(...Object.values(seriesDataCache[categoryName]).map(item => item.playlistId));
-                    createCategorySection(categoryName, seriesDataCache[categoryName]);
-                }
-                populateSlider(bannerSliderContent, allPlaylistIds, createBannerItem);
-            }
-        });
-      }
-
-      function createCategorySection(name, series) {
-          const section = document.createElement('section'); section.className = 'category-section'; section.id = `category-${name}`;
-          const title = document.createElement('h2'); title.className = 'category-title'; title.textContent = name;
-          const carouselContainer = document.createElement('div'); carouselContainer.className = 'series-carousel-container slider-container';
-          const carousel = document.createElement('div'); carousel.className = 'series-carousel slider';
+      // جلب البيانات
+      onValue(ref(database, 'series/'), (snapshot) => {
+          const data = snapshot.val() || {};
+          seriesCache = data;
           
-          carouselContainer.appendChild(carousel); section.appendChild(title); section.appendChild(carouselContainer); mainContent.appendChild(section);
+          // 1. تجميع كل المسلسلات للبانر (تلقائي)
+          const allPlaylists = [];
+          Object.keys(data).forEach(cat => {
+              Object.values(data[cat]).forEach(item => allPlaylists.push(item.playlistId));
+          });
           
-          const playlistIds = Object.values(series).map(item => item.playlistId);
-          populateSlider(carousel, playlistIds, (id, info, container) => createSeriesCard(id, info, container, name));
-          makeDraggable(carouselContainer);
-      }
-      
-      async function populateSlider(container, playlistIds, createItemFunc) {
-        const uniqueIds = [...new Set(playlistIds)]; // Ensure no duplicates
-        for (const id of uniqueIds) {
-            const info = await fetchApiData(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${id}&key=${YOUTUBE_API_KEY}`);
-            if (info) createItemFunc(id, info, container);
-        }
-        // Create seamless loop after all original items are added
-        if (container.children.length > 0) {
-            Array.from(container.children).forEach(item => container.appendChild(item.cloneNode(true)));
-        }
-      }
-
-      async function fetchApiData(url) {
-          try {
-              const response = await fetch(url);
-              if (!response.ok) throw new Error(`Network error: ${response.status}`);
-              const data = await response.json();
-              return (data.items && data.items.length > 0) ? data : null;
-          } catch (error) { console.error("YouTube API Error:", error); return null; }
-      }
-
-      // --- ITEM CREATION ---
-      function createBannerItem(id, info, container) {
-          const playlist = info.items[0].snippet;
-          const imageUrl = playlist.thumbnails.maxres?.url || playlist.thumbnails.high.url;
-          const item = document.createElement('div'); item.className = 'banner-item';
-          item.onclick = () => openDetailsView(id, imageUrl, "Unknown"); // Category isn't needed here
-          item.innerHTML = `<img src="${imageUrl}" alt="${playlist.title}" loading="lazy">`;
-          container.appendChild(item);
-      }
-
-      function createSeriesCard(id, info, container, categoryName) {
-          const playlist = info.items[0].snippet;
-          const imageUrl = playlist.thumbnails.high.url;
-          const card = document.createElement('div'); card.className = 'series-card-small';
-          card.onclick = () => openDetailsView(id, imageUrl, categoryName);
-          card.innerHTML = `<img src="${imageUrl}" alt="${playlist.title}" loading="lazy"><div class="title">${playlist.title}</div>`;
-          container.appendChild(card);
-      }
-
-      // --- VIEW MANAGEMENT ---
-      async function openDetailsView(playlistId, imageUrl, categoryName) {
-          showView(detailsView, imageUrl, '<h2>جاري التحميل...</h2>');
-          const seriesInfoData = await fetchApiData(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${YOUTUBE_API_KEY}`);
-          const itemsData = await fetchApiData(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}&maxResults=50`);
+          // منع التكرار في البانر
+          const uniqueIds = [...new Set(allPlaylists)];
+          buildBanner(uniqueIds);
           
-          if (!seriesInfoData || !itemsData) { updateViewContent(detailsView, "<h2>خطأ</h2><p>لم نتمكن من تحميل تفاصيل المسلسل.</p>"); return; }
+          // 2. بناء الأقسام
+          const mainContent = document.getElementById('main-content');
+          mainContent.innerHTML = '';
           
-          const seriesInfo = seriesInfoData.items[0].snippet;
-          const episodesHtml = itemsData.items.map(item => {
-              const ep = item.snippet;
-              return `<div class="episode-item" onclick="openEpisodeView('${playlistId}', '${ep.resourceId.videoId}', '${imageUrl}', '${categoryName}')">
-                          <img src="${ep.thumbnails.medium.url}" alt="${ep.title}"><span>${ep.title}</span>
-                      </div>`;
-          }).join('');
+          Object.keys(data).forEach(async cat => { // استخدام async
+              const section = document.createElement('div');
+              section.className = 'category-section';
+              section.innerHTML = `<h2 class="category-title">${cat}</h2><div class="slider-container"><div class="slider" id="cat-${cat}"></div></div>`;
+              mainContent.appendChild(section);
+              
+              const catIds = Object.values(data[cat]).map(i => i.playlistId);
+              await buildSlider(document.getElementById(`cat-${cat}`), catIds);
+              // تفعيل السحب اليدوي على كل قسم
+              makeDraggable(document.getElementById(`cat-${cat}`)); 
+          });
+      });
 
-          updateViewContent(detailsView, `
-              <div class="series-main-info">
-                  <img src="${imageUrl}" alt="${seriesInfo.title}">
-                  <div class="text-info">
-                      <h1>${seriesInfo.title}</h1>
-                      <button class="share-button" onclick="shareContent('series', '${playlistId}')">🔗 مشاركة</button>
-                      <iframe width="100%" height="315" src="https://www.youtube.com/embed/videoseries?list=${playlistId}" style="margin-top:20px; border-radius:10px;" frameborder="0" allowfullscreen></iframe>
+      async function buildBanner(ids) {
+          const container = document.getElementById('banner-content');
+          container.innerHTML = '';
+          // نأخذ آخر 10 مسلسلات فقط للبانر ليكون سريعاً
+          const recentIds = ids.slice(-10); 
+          
+          for (const id of recentIds) {
+              const info = await fetchYT(`playlists?part=snippet&id=${id}`);
+              if(info && info.items.length > 0) {
+                  const img = info.items[0].snippet.thumbnails.maxres?.url || info.items[0].snippet.thumbnails.high.url;
+                  const div = document.createElement('div');
+                  div.className = 'banner-item';
+                  div.onclick = () => openSeries(id);
+                  div.innerHTML = `<img src="${img}">`;
+                  container.appendChild(div);
+              }
+          }
+          // تفعيل السحب اليدوي على البانر
+          if(container.children.length > 0) {
+               makeDraggable(container);
+          }
+      }
+
+      async function buildSlider(container, ids) {
+          for (const id of ids) {
+              const info = await fetchYT(`playlists?part=snippet&id=${id}`);
+              if(info && info.items.length > 0) {
+                  const title = info.items[0].snippet.title;
+                  const img = info.items[0].snippet.thumbnails.high.url;
+                  const div = document.createElement('div');
+                  div.className = 'series-card';
+                  div.onclick = () => openSeries(id);
+                  div.innerHTML = `<img src="${img}"><div class="title">${title}</div>`;
+                  container.appendChild(div);
+              }
+          }
+      }
+
+      async function openSeries(id) {
+          const view = document.getElementById('details-view');
+          const content = document.getElementById('details-content');
+          content.innerHTML = '<h2 style="text-align:center">جاري التحميل...</h2>';
+          view.classList.add('active');
+          
+          const info = await fetchYT(`playlists?part=snippet&id=${id}`);
+          const items = await fetchYT(`playlistItems?part=snippet&playlistId=${id}&maxResults=50`);
+          
+          if(!info || !items || info.items.length === 0) {
+             content.innerHTML = '<h2 style="text-align:center">عذراً، لم يتم العثور على بيانات المسلسل.</h2>';
+             return;
+          }
+          
+          const s = info.items[0].snippet;
+          const bg = s.thumbnails.maxres?.url || s.thumbnails.high.url;
+          document.getElementById('details-bg').style.backgroundImage = `url(${bg})`;
+          
+          const episodesHtml = items.items.map(e => `
+              <div class="episode-card" onclick="playEpisode('${id}', '${e.snippet.resourceId.videoId}', '${e.snippet.title}')">
+                  <img class="episode-thumb" src="${e.snippet.thumbnails.medium.url}">
+                  <div>${e.snippet.title}</div>
+              </div>
+          `).join('');
+
+          content.innerHTML = `
+              <div class="info-grid">
+                  <img class="poster-img" src="${s.thumbnails.high.url}">
+                  <div class="text-content">
+                      <h1>${s.title}</h1>
+                      <p>${s.description.substring(0, 200)}${s.description.length > 200 ? '...' : ''}</p>
+                      <button class="action-btn" onclick="shareLink('${id}')">
+                          <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                          مشاركة المسلسل
+                      </button>
                   </div>
               </div>
-              <div class="episodes-list"><h2>الحلقات</h2>${episodesHtml}</div>`);
-      }
-      
-      async function openEpisodeView(playlistId, videoId, imageUrl, categoryName) {
-          showView(episodeView, imageUrl, '<h2>جاري التحميل...</h2>');
-          const itemsData = await fetchApiData(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}&maxResults=50`);
-          const currentEpisode = itemsData?.items.find(i => i.snippet.resourceId.videoId === videoId)?.snippet;
-          
-          if (!currentEpisode) { updateViewContent(episodeView, "<h2>خطأ</h2><p>لم نتمكن من العثور على هذه الحلقة.</p>"); return; }
-          
-          const relatedEpisodesHtml = itemsData.items.map((item, index) =>
-              `<div class="related-item">${index + 1}. ${item.snippet.title}</div>`
-          ).join('');
-
-          let recommendationsHtml = '';
-          if (seriesDataCache[categoryName]) {
-              recommendationsHtml = Object.values(seriesDataCache[categoryName])
-                  .filter(series => series.playlistId !== playlistId)
-                  .slice(0, 6) // Limit to 6 recommendations
-                  .map(series => `<div class="series-card-small" onclick="openDetailsView('${series.playlistId}', '', '${categoryName}')" id="rec-${series.playlistId}"></div>`)
-                  .join('');
-          }
-
-          updateViewContent(episodeView, `
-              <div class="video-player-container"><iframe src="https://www.youtube.com/embed/${videoId}?list=${playlistId}&autoplay=1" allowfullscreen></iframe></div>
-              <div class="episode-info">
-                  <h2>${currentEpisode.title}</h2>
-                  <button class="share-button" onclick="shareContent('episode', '${playlistId}', '${videoId}')">🔗 مشاركة الحلقة</button>
-              </div>
-              <div class="related-episodes-list"><h3>حلقات أخرى</h3>${relatedEpisodesHtml}</div>
-              <div class="recommendations-grid">${recommendationsHtml}</div>`);
-          
-          // Asynchronously load recommendation images
-          if (recommendationsHtml) {
-              document.querySelectorAll('[id^="rec-"]').forEach(async placeholder => {
-                  const pId = placeholder.id.replace('rec-', '');
-                  const info = await fetchApiData(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${pId}&key=${YOUTUBE_API_KEY}`);
-                  if (info) placeholder.innerHTML = `<img src="${info.items[0].snippet.thumbnails.high.url}"><div class="title">${info.items[0].snippet.title}</div>`;
-              });
-          }
+              <h3>الحلقات (${items.items.length})</h3>
+              <div class="episodes-grid">${episodesHtml}</div>
+          `;
       }
 
-      function showView(view, bgImageUrl, loadingMessage) {
-          view.querySelector('.view-content').innerHTML = `<div style="text-align:center; padding:40px;">${loadingMessage}</div>`;
-          view.querySelector('.view-background').style.backgroundImage = `url(${bgImageUrl})`;
+      async function playEpisode(playlistId, videoId, title) {
+          const view = document.getElementById('episode-view');
+          const content = document.getElementById('episode-content');
+          document.getElementById('details-view').classList.remove('active'); // غلق التفاصيل
           view.classList.add('active');
-      }
-      
-      function updateViewContent(view, html) {
-          view.querySelector('.view-content').innerHTML = html;
+          
+          // يمكن جلب صورة مصغرة للفيديو واستخدامها كخلفية
+          // const videoInfo = await fetchYT(`videos?part=snippet&id=${videoId}`);
+          // const bg = videoInfo.items[0].snippet.thumbnails.maxres?.url || videoInfo.items[0].snippet.thumbnails.high.url;
+          // document.getElementById('episode-bg').style.backgroundImage = `url(${bg})`;
+          
+          content.innerHTML = `
+              <h2>${title}</h2> <!-- عنوان الحلقة -->
+              <div class="video-container">
+                  <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
+              </div>
+              <div style="text-align:center; margin-bottom:30px;">
+                 <button class="action-btn" onclick="shareLink('${playlistId}', '${videoId}')">
+                    <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                    مشاركة الحلقة
+                 </button>
+              </div>
+              <h3>باقي الحلقات</h3>
+              <div class="episodes-grid" id="related-eps"></div>
+          `;
+          
+          // تحميل الحلقات المقترحة في الاسفل
+          const items = await fetchYT(`playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50`);
+          const html = items.items.map(e => {
+             const current = e.snippet.resourceId.videoId === videoId ? ' style="border: 2px solid var(--accent);"' : '';
+             return `
+                 <div class="episode-card" ${current} onclick="playEpisode('${playlistId}', '${e.snippet.resourceId.videoId}', '${e.snippet.title}')">
+                      <img class="episode-thumb" src="${e.snippet.thumbnails.medium.url}">
+                      <div>${e.snippet.title}</div>
+                  </div>
+              `;
+          }).join('');
+          document.getElementById('related-eps').innerHTML = html;
       }
 
-      function closeView(view) { view.classList.remove('active'); }
-      document.getElementById('back-button-details').onclick = () => closeView(detailsView);
-      document.getElementById('back-button-episode').onclick = () => closeView(episodeView);
+      async function fetchYT(params) {
+          try {
+              const res = await fetch(`https://www.googleapis.com/youtube/v3/${params}&key=${YOUTUBE_API_KEY}`);
+              return await res.json();
+          } catch(e) { console.error("Error fetching YT data:", e); return null; }
+      }
+
+      window.closeView = (id) => {
+          document.getElementById(id).classList.remove('active');
+          if(id === 'episode-view') {
+             // إيقاف تشغيل الفيديو عند الإغلاق
+             const iframe = document.querySelector('#episode-content iframe');
+             if(iframe) iframe.src = '';
+          }
+          // مسح الهاش عند العودة للصفحة الرئيسية
+          if(window.location.hash.includes('#series=')) {
+              window.history.pushState("", document.title, window.location.pathname + window.location.search);
+          }
+      };
       
-      // --- UTILITIES ---
-      window.shareContent = (type, playlistId, videoId = null) => {
-          let url = `${window.location.origin}${window.location.pathname}#series=${playlistId}`;
-          if (type === 'episode' && videoId) url += `&video=${videoId}`;
-          navigator.clipboard.writeText(url).then(() => alert('تم نسخ رابط المشاركة!'));
+      window.shareLink = (pid, vid) => {
+          let url = `${window.location.origin}${window.location.pathname}#series=${pid}`;
+          if(vid) url += `&vid=${vid}`;
+          navigator.clipboard.writeText(url).then(() => alert('تم نسخ الرابط بنجاح! يمكن الآن مشاركته مباشرة.'));
       }
       
-      function makeDraggable(element) {
-          let isDown = false, startX, scrollLeft;
-          element.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - element.offsetLeft; scrollLeft = element.scrollLeft; });
-          element.addEventListener('mouseleave', () => isDown = false); element.addEventListener('mouseup', () => isDown = false);
-          element.addEventListener('mousemove', (e) => {
-              if (!isDown) return; e.preventDefault();
-              element.scrollLeft = scrollLeft - ((e.pageX - element.offsetLeft) - startX) * 2;
-          });
+      // فتح الروابط المباشرة (Deep Linking)
+      window.onload = () => {
+          const hash = window.location.hash;
+          if(hash.includes('series=')) {
+              const pid = hash.split('series=')[1].split('&')[0];
+              const vid = hash.includes('vid=') ? hash.split('vid=')[1].split('&')[0] : null;
+              if(vid) {
+                 // يجب جلب عنوان الحلقة لتمريره
+                 // هذا يتطلب طلب إضافي، ولتسهيل الأمر، سنقوم فقط بالتشغيل
+                 playEpisode(pid, vid, 'جاري تحميل العنوان...');
+              }
+              else openSeries(pid);
+          }
       }
       
-      // --- INITIALIZATION ---
-      fetchSeriesFromFirebase();
-      makeDraggable(document.getElementById('banner-container'));
-      
-      // Allow global access to functions called from inline onclick
-      window.openDetailsView = openDetailsView;
-      window.openEpisodeView = openEpisodeView;
+      // كود تفعيل السحب اليدوي (Drag/Swipe)
+      window.makeDraggable = (slider) => {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        const startDrag = (e) => {
+            isDown = true;
+            slider.style.cursor = 'grabbing';
+            const clientX = e.touches ? e.touches[0].pageX : e.pageX;
+            startX = clientX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        };
+
+        const endDrag = () => {
+            isDown = false;
+            slider.style.cursor = 'grab';
+        };
+
+        const moveDrag = (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].pageX : e.pageX;
+            const x = clientX - slider.offsetLeft;
+            const walk = (x - startX) * 2; // تحريك أسرع
+            slider.scrollLeft = scrollLeft - walk;
+        };
+
+        // أحداث الفأرة
+        slider.addEventListener('mousedown', startDrag);
+        slider.addEventListener('mouseleave', endDrag);
+        slider.addEventListener('mouseup', endDrag);
+        slider.addEventListener('mousemove', moveDrag);
+        
+        // أحداث اللمس (موبايل)
+        slider.addEventListener('touchstart', startDrag, { passive: true });
+        slider.addEventListener('touchend', endDrag);
+        slider.addEventListener('touchmove', moveDrag, { passive: false });
+      };
     </script>
 </body>
 </html>
