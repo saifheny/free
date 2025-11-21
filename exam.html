@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة الامتحان</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* شاشة البداية */
+        #startScreen, #resultScreen { text-align: center; }
+        input[type="text"] { padding: 12px; width: 80%; margin: 20px 0; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
+        
+        /* أسئلة الامتحان */
+        #quizScreen { display: none; }
+        .question-card { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .question-text { font-weight: bold; font-size: 18px; margin-bottom: 15px; color: #2c3e50; }
+        .option-label { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 4px; transition: 0.2s; }
+        .option-label:hover { background-color: #f9f9f9; }
+        input[type="radio"] { margin-left: 10px; }
+
+        /* الأزرار */
+        .btn { padding: 12px 30px; font-size: 18px; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-start { background: #007bff; }
+        .btn-submit { background: #28a745; width: 100%; margin-top: 20px; }
+
+        /* النتيجة */
+        #resultScreen { display: none; }
+        .score-box { font-size: 24px; font-weight: bold; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .msg-good { color: #28a745; }
+        .msg-bad { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. شاشة تسجيل الاسم -->
+    <div id="startScreen">
+        <h2 id="examTitleDisplay">جاري تحميل الامتحان...</h2>
+        <p>يرجى إدخال اسمك للبدء</p>
+        <input type="text" id="studentName" placeholder="الاسم الثلاثي">
+        <br>
+        <button class="btn btn-start" onclick="startExam()">بدء الامتحان</button>
+    </div>
+
+    <!-- 2. شاشة الأسئلة -->
+    <div id="quizScreen">
+        <div id="questionsList"></div>
+        <button class="btn btn-submit" onclick="submitExam()">تسليم الإجابة</button>
+    </div>
+
+    <!-- 3. شاشة النتيجة -->
+    <div id="resultScreen">
+        <h2>نتيجة الامتحان</h2>
+        <p id="studentNameDisplay"></p>
+        <div class="score-box" id="scoreDisplay"></div>
+        <h3 id="feedbackMessage"></h3>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCsnZdFrg-KlWFc0z6OgmXgBp6lPKf14fU",
+    authDomain: "saifsa-b51f1.firebaseapp.com",
+    databaseURL: "https://saifsa-b51f1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "saifsa-b51f1",
+    storageBucket: "saifsa-b51f1.firebasestorage.app",
+    messagingSenderId: "41089917871",
+    appId: "1:41089917871:web:fce49f6f23bd4f679b055a",
+    measurementId: "G-4K733KS3CP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let examData = null;
+  const urlParams = new URLSearchParams(window.location.search);
+  const examId = urlParams.get('id');
+
+  // تحميل بيانات الامتحان عند فتح الصفحة
+  window.onload = async function() {
+      if(!examId) {
+          document.body.innerHTML = "<h3 style='text-align:center; margin-top:50px;'>رابط الامتحان غير صحيح</h3>";
+          return;
+      }
+
+      const examRef = ref(db, 'exams/' + examId);
+      try {
+          const snapshot = await get(examRef);
+          if(snapshot.exists()) {
+              examData = snapshot.val();
+              document.getElementById('examTitleDisplay').innerText = examData.title;
+          } else {
+              document.body.innerHTML = "<h3 style='text-align:center;'>الامتحان غير موجود</h3>";
+          }
+      } catch(e) {
+          console.error(e);
+          alert("حدث خطأ في الاتصال");
+      }
+  };
+
+  window.startExam = function() {
+      const name = document.getElementById('studentName').value;
+      if(!name) { alert("الرجاء كتابة الاسم"); return; }
+
+      // إخفاء شاشة البداية وإظهار الأسئلة
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+
+      const list = document.getElementById('questionsList');
+      list.innerHTML = '';
+
+      // عرض الأسئلة تحت بعض
+      examData.questions.forEach((q, index) => {
+          let optionsHTML = '';
+          q.options.forEach((opt, optIndex) => {
+              optionsHTML += `
+                <label class="option-label">
+                    <input type="radio" name="q${index}" value="${optIndex}">
+                    ${opt}
+                </label>
+              `;
+          });
+
+          const qHTML = `
+            <div class="question-card">
+                <div class="question-text">${index + 1}. ${q.text}</div>
+                <div class="options-list">${optionsHTML}</div>
+            </div>
+          `;
+          list.insertAdjacentHTML('beforeend', qHTML);
+      });
+  };
+
+  window.submitExam = function() {
+      if(!confirm("هل أنت متأكد من تسليم الإجابة؟")) return;
+
+      let score = 0;
+      const total = examData.questions.length;
+
+      // حساب النتيجة
+      examData.questions.forEach((q, index) => {
+          const selected = document.querySelector(`input[name="q${index}"]:checked`);
+          if(selected && parseInt(selected.value) === q.correctIndex) {
+              score++;
+          }
+      });
+
+      const percentage = (score / total) * 100;
+
+      // عرض النتيجة
+      document.getElementById('quizScreen').style.display = 'none';
+      document.getElementById('resultScreen').style.display = 'block';
+      
+      document.getElementById('studentNameDisplay').innerText = "الطالب: " + document.getElementById('studentName').value;
+      document.getElementById('scoreDisplay').innerText = `الدرجة: ${score} من ${total}`;
+
+      const msgElement = document.getElementById('feedbackMessage');
+      if(percentage >= 50) {
+          msgElement.innerText = "ممتاز يا بطل! أنت رائع 🔥";
+          msgElement.className = "msg-good";
+      } else {
+          msgElement.innerText = "حظ أوفر المرة القادمة، ركز أكثر 💪";
+          msgElement.className = "msg-bad";
+      }
+  };
+</script>
+
+</body>
+</html>
