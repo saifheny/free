@@ -1,0 +1,21 @@
+{
+  "name": "أصوات حرة",
+  "short_name": "أصوات حرة",
+  "description": "منبر الأحرار - تكلم بحرية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/g0KcyDsw/Elegant-White-Dove-With-Olive-Branch-White-Dove-Bird-Peace-PNG-Transparent-Image-and-Clipart-for.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://i.postimg.cc/g0KcyDsw/Elegant-White-Dove-With-Olive-Branch-White-Dove-Bird-Peace-PNG-Transparent-Image-and-Clipart-for.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
