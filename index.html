@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>أصوات حرة - Voice of Freedom</title>
     
+    <meta property="og:title" content="منبر الأحرار - تكلم بحرية">
+    <meta property="og:description" content="مساحة صوتية حرة للنقاش والتعبير عن الرأي. انضم إلينا الآن.">
+    <meta property="og:image" content="https://i.postimg.cc/g0KcyDsw/Elegant-White-Dove-With-Olive-Branch-White-Dove-Bird-Peace-PNG-Transparent-Image-and-Clipart-for.jpg">
+    <meta property="og:type" content="website">
+
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -30,22 +35,15 @@
             width: 100vw;
             overflow: hidden;
             display: flex; flex-direction: column; position: relative;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
         }
 
-        .sky-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0; overflow: hidden;
-            background: radial-gradient(circle at bottom, #0f1215 0%, #000000 70%);
+        .bg-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 150vw; height: 150vw;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 70%);
+            pointer-events: none; z-index: 0;
         }
-        .star {
-            position: absolute; height: 2px;
-            background: linear-gradient(-45deg, rgba(95, 145, 255, 1), rgba(0, 0, 255, 0));
-            border-radius: 999px; filter: drop-shadow(0 0 6px rgba(105, 155, 255, 1));
-            animation: tail 3000ms ease-in-out infinite, shooting 3000ms ease-in-out infinite;
-        }
-
-        @keyframes tail { 0% { width: 0; } 30% { width: 100px; } 100% { width: 0; } }
-        @keyframes shooting { 0% { transform: translateX(0) translateY(0) rotate(45deg); opacity: 1; } 100% { transform: translateX(-300px) translateY(300px) rotate(45deg); opacity: 0; } }
 
         .app-view {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -55,10 +53,11 @@
         }
         .app-view.active { opacity: 1; pointer-events: all; transform: scale(1); }
 
-        .home-content { margin: auto; width: 100%; text-align: center; padding: 20px; }
-        .freedom-icon { font-size: 4.5rem; color: var(--gold); margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--gold-glow)); }
+        .home-content { margin: auto; width: 100%; text-align: center; padding: 20px; z-index: 2; }
+        .freedom-icon { font-size: 5rem; color: var(--white); margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(255,255,255,0.2)); }
 
-        h1 { font-weight: 700; font-size: 2rem; margin-bottom: 5px; background: linear-gradient(to bottom, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h1 { font-weight: 900; font-size: 2.2rem; margin-bottom: 0; color: #fff; }
+        .slogan { font-size: 1.1rem; color: var(--gold); margin-bottom: 10px; font-weight: 700; letter-spacing: 1px; }
         .sub-text { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 40px; }
 
         .main-btn {
@@ -144,15 +143,13 @@
 </head>
 <body>
 
-    <div class="sky-container">
-        <div class="star" style="top: 10%; left: 80%; width: 100px; animation-delay: 0s;"></div>
-        <div class="star" style="top: 20%; left: 30%; width: 120px; animation-delay: 3s;"></div>
-    </div>
+    <div class="bg-effect"></div>
 
     <div class="app-view active" id="v-home">
         <div class="home-content">
             <div class="freedom-icon"><i class="fas fa-dove"></i></div>
             <h1>منبر الأحرار</h1>
+            <div class="slogan">تكلم بحرية</div>
             <p class="sub-text" id="id-text">جاري التحميل...</p>
 
             <div class="main-btn" id="btn-rejoin" onclick="rejoinLastRoom()">
