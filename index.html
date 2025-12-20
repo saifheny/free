@@ -56,7 +56,7 @@
         }
         .app-view.active { opacity: 1; pointer-events: all; transform: scale(1); }
 
-        .home-content { margin: auto; width: 100%; text-align: center; padding: 20px; z-index: 2; overflow-y: auto; }
+        .home-content { margin: auto; width: 100%; text-align: center; padding: 20px; z-index: 2; }
         .freedom-icon { font-size: 5rem; color: var(--white); margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(255,255,255,0.2)); }
 
         h1 { font-weight: 900; font-size: 2.2rem; margin-bottom: 0; color: #fff; }
@@ -71,18 +71,6 @@
         }
         .main-btn .text-box { flex: 1; margin-right: 15px; text-align: right; }
 
-        /* الأزرار المزدوجة */
-        .dual-btn-container {
-            display: flex; gap: 10px; width: 100%; max-width: 320px; margin: 15px auto;
-        }
-        .small-btn {
-            flex: 1; padding: 15px; border-radius: 16px; border: 1px solid #222;
-            background: rgba(255,255,255,0.03); cursor: pointer; text-align: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-        }
-        .small-btn i { font-size: 1.2rem; margin-bottom: 5px; }
-        .small-btn span { font-size: 0.8rem; font-weight: 700; }
-
         .room-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .live-badge { font-size: 0.9rem; font-weight: 700; color: #fff; }
         .copy-btn { background:transparent; border:1px solid #333; color:white; padding:8px 15px; border-radius:20px; cursor:pointer; }
@@ -92,25 +80,44 @@
         .layout-2 { grid-template-columns: 1fr 1fr; max-width: 500px; margin: 0 auto; width: 100%; }
         .layout-more { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); width: 100%; }
 
-        .user-card { aspect-ratio: 1; background: var(--bg-card); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid #222; overflow: hidden; transition: 0.2s; }
-        .user-card.clickable:active { transform: scale(0.95); border-color: var(--fabric-red); }
+        .user-card { aspect-ratio: 1; background: var(--bg-card); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid #222; overflow: hidden; }
         .card-avatar { width: 60px; height: 60px; border-radius: 50%; background: #000; border: 2px solid #333; color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; z-index: 2; position: relative; }
         
-        .voice-wave-container { position: absolute; bottom: 20px; right: 20px; display: flex; align-items: flex-end; gap: 3px; height: 20px; opacity: 0; transition: opacity 0.2s; }
+        .voice-wave-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
         .voice-wave-container.speaking { opacity: 1; }
-        .wave-bar { width: 4px; background-color: var(--gold); border-radius: 2px; animation: waveAnim 1s ease-in-out infinite; }
+        
+        .wave-bar {
+            width: 4px;
+            background-color: var(--gold);
+            border-radius: 2px;
+            animation: waveAnim 1s ease-in-out infinite;
+        }
         .wave-bar:nth-child(1) { height: 40%; animation-delay: 0.0s; }
         .wave-bar:nth-child(2) { height: 70%; animation-delay: 0.1s; }
         .wave-bar:nth-child(3) { height: 100%; animation-delay: 0.2s; }
         .wave-bar:nth-child(4) { height: 60%; animation-delay: 0.3s; }
-        @keyframes waveAnim { 0%, 100% { height: 30%; } 50% { height: 100%; } }
+
+        @keyframes waveAnim {
+            0%, 100% { height: 30%; }
+            50% { height: 100%; }
+        }
 
         .dock { position: absolute; bottom: var(--safe-bottom); left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 60px; border: 1px solid #222; display: flex; gap: 15px; z-index: 100; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .dock-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--white); color: #000; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .dock-btn.danger { width: 60px; height: 60px; color: white; background-color: var(--fabric-red); border: 1px solid #8a0000; }
 
-        .audio-gate, .overlay-common { position: fixed; inset: 0; background: #000; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.4s; }
-        .audio-gate.show, .overlay-common.show { opacity: 1; pointer-events: all; }
+        .audio-gate { position: fixed; inset: 0; background: #000; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.4s; }
+        .audio-gate.show { opacity: 1; pointer-events: all; }
         
         .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(4px); }
         .share-overlay.show { opacity: 1; pointer-events: all; }
@@ -121,7 +128,11 @@
         .share-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
         .share-icon { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; }
         .share-label { font-size: 0.8rem; color: #888; }
-        .whatsapp { background: #25D366; } .telegram { background: #0088cc; } .facebook { background: #1877F2; } .copy-link-item { background: #333; }
+        
+        .whatsapp { background: #25D366; }
+        .telegram { background: #0088cc; }
+        .facebook { background: #1877F2; }
+        .copy-link-item { background: #333; }
 
         .toast-container { position: fixed; bottom: calc(var(--safe-bottom) + 85px); left: 50%; transform: translateX(-50%); z-index: 400; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
         .toast { background: rgba(255,255,255,0.95); color: black; padding: 12px 25px; border-radius: 30px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transform: translateY(20px); opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-top: 10px; }
@@ -132,39 +143,30 @@
         .filter-opt { padding: 12px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; font-weight: 700; text-align: center; }
         .filter-opt.selected { background: #000; color: white; }
 
-        /* نافذة التثبيت */
-        .install-banner {
-            width: 100%; max-width: 320px; margin: 10px auto; padding: 15px;
-            background: #111; border: 1px solid var(--gold); border-radius: 16px;
-            display: none; align-items: center; justify-content: space-between;
-        }
-        .install-banner.show { display: flex; }
-        
-        /* قائمة الغرف الجماعية */
-        .community-list { width: 100%; max-width: 340px; margin: 20px auto; display: flex; flex-direction: column; gap: 10px; height: 100%; overflow-y: auto; padding-bottom: 100px; }
-        .room-item { background: #111; padding: 20px; border-radius: 16px; border: 1px solid #222; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .room-item:hover { background: #161616; border-color: #444; }
-        .room-info h4 { color: #fff; margin-bottom: 5px; }
-        .room-info p { color: #666; font-size: 0.8rem; }
-
-        /* نافذة اختيار نوع الغرفة */
-        .modal-card { background: #151515; padding: 30px; border-radius: 25px; border: 1px solid #333; text-align: center; width: 90%; max-width: 320px; }
-        .type-btn { width: 100%; padding: 15px; margin: 5px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 10px; justify-content: center; font-size: 1rem; }
-        .type-btn.selected { border-color: var(--gold); background: rgba(255, 183, 0, 0.1); }
-        .create-confirm-btn { background: var(--white); color: black; border: none; padding: 12px 30px; border-radius: 30px; margin-top: 20px; font-weight: 700; width: 100%; cursor: pointer; }
-
-        /* نافذة الحظر */
-        .ban-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a0000; border-top: 2px solid red; padding: 30px; border-radius: 30px 30px 0 0; z-index: 500; transform: translateY(100%); transition: 0.3s; text-align: center; }
-        .ban-modal.show { transform: translateY(0); }
-        .ban-btn { background: red; color: white; padding: 15px 40px; border-radius: 30px; border: none; font-weight: bold; font-size: 1.1rem; margin-top: 10px; width: 100%; cursor: pointer; }
-
+        .install-popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(5px); }
+        .install-popup-overlay.show { opacity: 1; pointer-events: all; }
+        .install-card { background: #111; border: 1px solid #333; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 320px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .install-logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 20px; object-fit: cover; border: 2px solid #333; }
+        .install-title { color: white; margin-bottom: 5px; font-size: 1.2rem; }
+        .install-desc { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
+        .btn-install { background: var(--white); color: black; border: none; padding: 12px 40px; border-radius: 30px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; width: 100%; }
+        .btn-close-install { margin-top: 15px; background: transparent; color: #666; border: none; font-size: 0.9rem; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <div class="bg-effect"></div>
 
-    <!-- نافذة تثبيت التطبيق داخل الهوم -->
+    <div class="install-popup-overlay" id="install-popup">
+        <div class="install-card">
+            <img src="https://i.postimg.cc/g0KcyDsw/Elegant-White-Dove-With-Olive-Branch-White-Dove-Bird-Peace-PNG-Transparent-Image-and-Clipart-for.jpg" class="install-logo" alt="Logo">
+            <h3 class="install-title">تثبيت التطبيق</h3>
+            <p class="install-desc">قم بتثبيت منبر الأحرار لتجربة أفضل</p>
+            <button class="btn-install" onclick="triggerInstall()">تثبيت الآن</button>
+            <button class="btn-close-install" onclick="closeInstallPopup()">ليس الآن</button>
+        </div>
+    </div>
+
     <div class="app-view active" id="v-home">
         <div class="home-content">
             <div class="freedom-icon"><i class="fas fa-dove"></i></div>
@@ -172,29 +174,15 @@
             <div class="slogan">تكلم بحرية</div>
             <p class="sub-text" id="id-text">جاري التحميل...</p>
 
-            <div class="install-banner" id="install-banner">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-download" style="color:var(--gold)"></i>
-                    <div style="text-align:right;">
-                        <h4 style="font-size:0.9rem; margin:0;">تثبيت التطبيق</h4>
-                        <span style="font-size:0.7rem; color:#888;">تجربة أفضل وسرعة أعلى</span>
-                    </div>
+            <div class="main-btn" id="btn-rejoin" onclick="rejoinLastRoom()">
+                <div class="text-box">
+                    <h3>غرفتك السابقة</h3>
+                    <p id="last-room-txt">العودة للمساحة الأخيرة</p>
                 </div>
-                <button onclick="triggerInstall()" style="background:var(--gold); color:black; border:none; padding:8px 15px; border-radius:20px; font-weight:bold; cursor:pointer;">تثبيت</button>
+                <div style="width:40px; height:40px; background:#222; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-history"></i></div>
             </div>
 
-            <div class="dual-btn-container">
-                <div class="small-btn" id="btn-rejoin" onclick="rejoinLastRoom()" style="opacity: 0.5; pointer-events: none;">
-                    <i class="fas fa-history"></i>
-                    <span id="last-room-txt">غرفتك السابقة</span>
-                </div>
-                <div class="small-btn" onclick="openCommunityView()">
-                    <i class="fas fa-users"></i>
-                    <span>الغرف الجماعية</span>
-                </div>
-            </div>
-
-            <div class="main-btn" onclick="openCreateModal()">
+            <div class="main-btn" onclick="createNewRoom()">
                 <div class="text-box">
                     <h3>مساحة جديدة</h3>
                     <p>بدء نقاش جديد كلياً</p>
@@ -204,18 +192,6 @@
         </div>
     </div>
 
-    <!-- واجهة الغرف الجماعية -->
-    <div class="app-view" id="v-community">
-        <div class="room-header">
-            <h2 style="font-size:1.2rem;">الغرف الجماعية</h2>
-            <button class="copy-btn" onclick="backToHome()"><i class="fas fa-arrow-left"></i></button>
-        </div>
-        <div class="community-list" id="community-list">
-            <p style="text-align:center; color:#666; margin-top:50px;">جاري البحث عن غرف...</p>
-        </div>
-    </div>
-
-    <!-- واجهة الغرفة -->
     <div class="app-view" id="v-room">
         <div class="room-header">
             <div class="live-badge"><i class="fas fa-circle" style="font-size: 8px; color: var(--gold); margin-left:5px;"></i> مباشر</div>
@@ -239,7 +215,6 @@
         <div id="audio-container"></div>
     </div>
 
-    <!-- نافذة المشاركة -->
     <div class="share-overlay" id="share-overlay" onclick="closeShareSheet()"></div>
     <div class="share-sheet" id="share-sheet">
         <div style="width: 40px; height: 5px; background: #333; border-radius: 10px; margin: 0 auto 30px;"></div>
@@ -264,7 +239,6 @@
         </div>
     </div>
 
-    <!-- بوابة الدخول -->
     <div class="audio-gate" id="audio-gate">
         <div style="width: 80px; height: 80px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
             <i class="fas fa-microphone-alt" style="color: black; font-size: 2rem;"></i>
@@ -274,34 +248,11 @@
         <button onclick="confirmEntry()" style="width: 200px; padding: 15px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer;">دخول الآن</button>
     </div>
 
-    <!-- نافذة اختيار نوع الغرفة -->
-    <div class="overlay-common" id="create-modal">
-        <div class="modal-card">
-            <h3 style="color:white; margin-bottom:20px;">نوع الغرفة</h3>
-            <div class="type-btn selected" id="type-private" onclick="selectRoomType('private')">
-                <i class="fas fa-lock"></i> خاصة (دعوة فقط)
-            </div>
-            <div class="type-btn" id="type-public" onclick="selectRoomType('public')">
-                <i class="fas fa-globe"></i> عامة (تظهر للجميع)
-            </div>
-            <button class="create-confirm-btn" onclick="proceedCreateRoom()">إنشاء</button>
-            <button onclick="document.getElementById('create-modal').classList.remove('show')" style="background:transparent; border:none; color:#666; margin-top:10px; cursor:pointer;">إلغاء</button>
-        </div>
-    </div>
-
-    <!-- نافذة الحظر -->
-    <div class="ban-modal" id="ban-modal">
-        <h3 style="color:white;">خيارات المشرف</h3>
-        <p style="color:#aaa; font-size:0.9rem;">إجراء حازم ضد هذا المستخدم</p>
-        <button class="ban-btn" onclick="executeBan()">حظر و طرد (Ban)</button>
-        <button onclick="closeBanModal()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer;">إلغاء</button>
-    </div>
-
     <div class="toast-container" id="toast-container"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove, onDisconnect, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAjE-2q6PONBkCin9ZN22gDp9Q8pAH9ZW8",
@@ -325,11 +276,7 @@
         let calls = {};
         let roomRef = null;
         let deferredPrompt;
-        let selectedRoomType = 'private';
-        let isAdmin = false;
-        let selectedUserForBan = null;
 
-        // PWA Install Logic
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
@@ -337,45 +284,34 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('install-banner').classList.add('show');
+            document.getElementById('install-popup').classList.add('show');
         });
 
         window.triggerInstall = async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if(outcome === 'accepted') {
-                    document.getElementById('install-banner').classList.remove('show');
-                }
                 deferredPrompt = null;
+                document.getElementById('install-popup').classList.remove('show');
             }
+        };
+
+        window.closeInstallPopup = () => {
+            document.getElementById('install-popup').classList.remove('show');
         };
 
         window.onload = () => {
             document.getElementById('id-text').innerHTML = `هويتك: <b>${user.code}</b>`;
             const urlRoom = new URLSearchParams(location.search).get('room');
-            if(urlRoom) { 
-                checkBanStatus(urlRoom).then(banned => {
-                    if(banned) {
-                        alert("تم حظرك من هذه الغرفة! لا يمكنك الدخول.");
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    } else {
-                        activeRoom = urlRoom; 
-                        document.getElementById('audio-gate').classList.add('show');
-                    }
-                });
-            }
+            if(urlRoom) { activeRoom = urlRoom; document.getElementById('audio-gate').classList.add('show'); }
             updateUI();
         };
 
         function updateUI() {
             const last = localStorage.getItem('last_room');
             const btn = document.getElementById('btn-rejoin');
-            if(last) { 
-                btn.style.opacity = '1'; 
-                btn.style.pointerEvents = 'all';
-                btn.onclick = rejoinLastRoom; 
-            }
+            if(last) { btn.style.opacity = '1'; document.getElementById('last-room-txt').innerText = "غرفة: " + last; btn.onclick = rejoinLastRoom; }
+            else { btn.style.opacity = '0.5'; btn.onclick = null; }
         }
 
         window.showToast = (msg) => {
@@ -391,101 +327,31 @@
             }, 3000);
         };
 
-        // Navigation
-        window.openCommunityView = () => {
-            document.getElementById('v-home').classList.remove('active');
-            document.getElementById('v-community').classList.add('active');
-            loadPublicRooms();
-        };
+        window.openShareSheet = () => { document.getElementById('share-overlay').classList.add('show'); document.getElementById('share-sheet').classList.add('show'); };
+        window.closeShareSheet = () => { document.getElementById('share-overlay').classList.remove('show'); document.getElementById('share-sheet').classList.remove('show'); };
 
-        window.backToHome = () => {
-            document.getElementById('v-community').classList.remove('active');
-            document.getElementById('v-home').classList.add('active');
-        };
-
-        window.openCreateModal = () => document.getElementById('create-modal').classList.add('show');
-        window.selectRoomType = (type) => {
-            selectedRoomType = type;
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
-            document.getElementById('type-'+type).classList.add('selected');
-        };
-
-        window.proceedCreateRoom = () => {
-            document.getElementById('create-modal').classList.remove('show');
-            activeRoom = Math.random().toString(36).substr(2,8);
-            localStorage.setItem('last_room', activeRoom);
-            
-            // تعيين إعدادات الغرفة
-            set(ref(db, `rooms/${activeRoom}/config`), {
-                owner: user.id,
-                type: selectedRoomType,
-                created: Date.now()
-            });
-
-            // إذا كانت عامة، نضيفها لقائمة الغرف العامة
-            if(selectedRoomType === 'public') {
-                set(ref(db, `public_rooms/${activeRoom}`), {
-                    created: Date.now(),
-                    ownerCode: user.code
-                });
-            }
-
-            document.getElementById('audio-gate').classList.add('show');
-        };
-
-        window.rejoinLastRoom = () => { 
-            activeRoom = localStorage.getItem('last_room');
-            checkBanStatus(activeRoom).then(banned => {
-                if(banned) {
-                    showToast("لقد تم حظرك من هذه الغرفة");
-                } else {
-                    document.getElementById('audio-gate').classList.add('show'); 
-                }
+        window.copyLinkAction = () => {
+            const link = `${location.origin}${location.pathname}?room=${activeRoom}`;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast("تم نسخ الرابط");
+                closeShareSheet();
             });
         };
 
-        window.joinPublicRoom = (roomId) => {
-            activeRoom = roomId;
-            checkBanStatus(roomId).then(banned => {
-                if(banned) {
-                    showToast("لقد تم حظرك من هذه الغرفة");
-                } else {
-                    localStorage.setItem('last_room', activeRoom);
-                    document.getElementById('audio-gate').classList.add('show');
-                }
-            });
+        window.shareTo = (platform) => {
+            const link = `${location.origin}${location.pathname}?room=${activeRoom}`;
+            const text = `انضم إلي في منبر الأحرار: `;
+            let url = '';
+            if(platform === 'whatsapp') url = `https://wa.me/?text=${encodeURIComponent(text + link)}`;
+            else if(platform === 'telegram') url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+            else if(platform === 'facebook') url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            window.open(url, '_blank');
+            closeShareSheet();
         };
 
-        async function checkBanStatus(roomId) {
-            const snap = await get(ref(db, `rooms/${roomId}/banned/${user.id}`));
-            return snap.exists();
-        }
+        window.createNewRoom = () => { activeRoom = Math.random().toString(36).substr(2,8); localStorage.setItem('last_room', activeRoom); document.getElementById('audio-gate').classList.add('show'); };
+        window.rejoinLastRoom = () => { activeRoom = localStorage.getItem('last_room'); document.getElementById('audio-gate').classList.add('show'); };
 
-        function loadPublicRooms() {
-            const list = document.getElementById('community-list');
-            list.innerHTML = '<p style="text-align:center;color:#666;margin-top:20px;">جار التحميل...</p>';
-            onValue(ref(db, 'public_rooms'), (snap) => {
-                list.innerHTML = '';
-                const rooms = snap.val();
-                if(!rooms) {
-                    list.innerHTML = '<p style="text-align:center;color:#666;margin-top:20px;">لا توجد غرف عامة حالياً</p>';
-                    return;
-                }
-                Object.entries(rooms).forEach(([id, data]) => {
-                    list.innerHTML += `
-                        <div class="room-item" onclick="joinPublicRoom('${id}')">
-                            <div class="room-info">
-                                <h4>غرفة عامة #${id.substr(0,4)}</h4>
-                                <p>المنشئ: ${data.ownerCode}</p>
-                            </div>
-                            <i class="fas fa-sign-in-alt" style="color:var(--gold)"></i>
-                        </div>
-                    `;
-                });
-            }, { onlyOnce: true });
-        }
-
-        // Room Logic
         window.confirmEntry = async () => {
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -501,6 +367,7 @@
                     call.answer(audioDestination.stream);
                     call.on('stream', stream => handleRemoteStream(stream, call.peer));
                 });
+                peer.on('error', err => console.log(err));
 
                 document.getElementById('audio-gate').classList.remove('show');
                 document.getElementById('v-home').classList.remove('active');
@@ -509,19 +376,6 @@
         };
 
         function startRoom() {
-            // التحقق من الملكية
-            get(ref(db, `rooms/${activeRoom}/config/owner`)).then(snap => {
-                isAdmin = (snap.val() === user.id);
-            });
-
-            // مراقبة الحظر الشخصي
-            onValue(ref(db, `rooms/${activeRoom}/banned/${user.id}`), (snap) => {
-                if(snap.exists()) {
-                    exitToMenu();
-                    alert("تم حظرك من الغرفة! لا يمكنك العودة.");
-                }
-            });
-
             roomRef = ref(db, `rooms/${activeRoom}/users/${user.id}`);
             set(roomRef, { code: user.code, peerId: myPeerId });
             onDisconnect(roomRef).remove();
@@ -568,8 +422,11 @@
                 
                 const waveContainer = document.getElementById('wave-' + id);
                 if(waveContainer) {
-                    if(vol > 15) waveContainer.classList.add('speaking');
-                    else waveContainer.classList.remove('speaking');
+                    if(vol > 15) {
+                        waveContainer.classList.add('speaking');
+                    } else {
+                        waveContainer.classList.remove('speaking');
+                    }
                 }
                 requestAnimationFrame(check);
             };
@@ -584,16 +441,15 @@
             
             list.forEach(u => {
                 const isMe = u.peerId === myPeerId;
-                const canBan = isAdmin && !isMe;
-                
                 grid.innerHTML += `
-                    <div class="user-card ${canBan ? 'clickable' : ''}" 
-                         ${canBan ? `onclick="openBanModal('${u.peerId}')"` : ''}>
-                        <div class="card-avatar" style="${canBan ? 'border-color:var(--white)' : ''}">${u.code}</div>
-                        ${isAdmin && isMe ? '<i class="fas fa-crown" style="position:absolute; top:10px; right:10px; color:gold; font-size:0.8rem;"></i>' : ''}
+                    <div class="user-card">
+                        <div class="card-avatar">${u.code}</div>
                         
                         <div class="voice-wave-container" id="wave-${u.peerId}">
-                            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
                         </div>
 
                         <div style="font-size:0.75rem; color:#888; margin-top:5px;">${isMe ? 'أنت' : 'مشارك'}</div>
@@ -602,40 +458,6 @@
             });
             if(audioSource) monitorVolume(audioSource, myPeerId);
         }
-
-        // Ban Logic
-        window.openBanModal = (targetPeerId) => {
-            selectedUserForBan = targetPeerId;
-            document.getElementById('ban-modal').classList.add('show');
-        };
-
-        window.closeBanModal = () => {
-            document.getElementById('ban-modal').classList.remove('show');
-            selectedUserForBan = null;
-        };
-
-        window.executeBan = () => {
-            if(!selectedUserForBan) return;
-            // البحث عن User ID بناءً على Peer ID
-            get(ref(db, `rooms/${activeRoom}/users`)).then(snap => {
-                const users = snap.val();
-                let targetUserId = null;
-                for(let uid in users) {
-                    if(users[uid].peerId === selectedUserForBan) {
-                        targetUserId = uid;
-                        break;
-                    }
-                }
-                if(targetUserId) {
-                    // إضافة لقائمة المحظورين
-                    set(ref(db, `rooms/${activeRoom}/banned/${targetUserId}`), true);
-                    // إزالة من المستخدمين (الطرد)
-                    remove(ref(db, `rooms/${activeRoom}/users/${targetUserId}`));
-                    showToast("تم حظر المستخدم بنجاح");
-                }
-                closeBanModal();
-            });
-        };
 
         window.toggleMic = () => {
             isMuted = !isMuted;
@@ -648,19 +470,31 @@
         };
 
         window.exitToMenu = () => {
-            if (roomRef) { remove(roomRef); roomRef = null; }
-            if(localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; }
-            if (peer) { peer.destroy(); peer = null; }
+            window.open('https://www.effectivegatecpm.com/k8fisnjjc?key=afa7ea920578f74cea5997d670bbe78e', '_blank');
+
+            if (roomRef) {
+                remove(roomRef);
+                roomRef = null;
+            }
+
+            if(localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
 
             calls = {};
             myPeerId = null;
             activeRoom = null;
             isMuted = false;
-            isAdmin = false;
-            document.getElementById('audio-container').innerHTML = '';
             
+            document.getElementById('audio-container').innerHTML = '';
+
             document.getElementById('v-room').classList.remove('active');
-            document.getElementById('v-community').classList.remove('active');
             document.getElementById('v-home').classList.add('active');
             
             const btn = document.getElementById('mic-btn');
@@ -682,35 +516,21 @@
             audioSource.disconnect();
             if(currentFilter) currentFilter.disconnect();
             
-            if(type === 'none') audioSource.connect(audioDestination);
-            else if(type === 'deep') {
+            if(type === 'none') {
+                audioSource.connect(audioDestination);
+            } else if(type === 'deep') {
                 const f = audioCtx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 500;
                 audioSource.connect(f); f.connect(audioDestination); currentFilter = f;
             } else if(type === 'echo') {
                 const delay = audioCtx.createDelay(); delay.delayTime.value = 0.3;
                 const feedback = audioCtx.createGain(); feedback.gain.value = 0.3;
                 delay.connect(feedback); feedback.connect(delay);
-                audioSource.connect(audioDestination); audioSource.connect(delay); delay.connect(audioDestination);
+                
+                audioSource.connect(audioDestination);
+                audioSource.connect(delay); delay.connect(audioDestination);
                 currentFilter = delay;
             }
             showToast("تم تحديث الفلتر");
-        };
-        
-        window.openShareSheet = () => { document.getElementById('share-overlay').classList.add('show'); document.getElementById('share-sheet').classList.add('show'); };
-        window.closeShareSheet = () => { document.getElementById('share-overlay').classList.remove('show'); document.getElementById('share-sheet').classList.remove('show'); };
-        window.copyLinkAction = () => {
-            const link = `${location.origin}${location.pathname}?room=${activeRoom}`;
-            navigator.clipboard.writeText(link).then(() => { showToast("تم نسخ الرابط"); closeShareSheet(); });
-        };
-        window.shareTo = (platform) => {
-            const link = `${location.origin}${location.pathname}?room=${activeRoom}`;
-            const text = `انضم إلي في منبر الأحرار: `;
-            let url = '';
-            if(platform === 'whatsapp') url = `https://wa.me/?text=${encodeURIComponent(text + link)}`;
-            else if(platform === 'telegram') url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
-            else if(platform === 'facebook') url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
-            window.open(url, '_blank');
-            closeShareSheet();
         };
     </script>
 </body>
