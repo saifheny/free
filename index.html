@@ -3,79 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>أصوات حرة - Voice of Freedom</title>
-    
-    <meta property="og:title" content="منبر الأحرار - تكلم بحرية">
-    <meta property="og:description" content="مساحة صوتية حرة للنقاش والتعبير عن الرأي. انضم إلينا الآن.">
+    <title>منبر الأحرار | مساحات صوتية حرة ومباشرة</title>
+    <meta name="description" content="انضم إلى منبر الأحرار، المنصة الصوتية الأقوى للنقاش الحر والمحادثات المباشرة. جودة صوت عالية، خصوصية تامة، وبدون تسجيل.">
+    <meta name="keywords" content="دردشة صوتية, مساحات صوتية, نقاش حر, منبر الأحرار, Voice Chat, WebRTC, مساحة حوار">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="منبر الأحرار - صوتك مسموع">
+    <meta property="og:description" content="أدخل في نقاشات صوتية مباشرة بجودة عالية ومن أي مكان في العالم.">
     <meta property="og:image" content="https://i.postimg.cc/g0KcyDsw/Elegant-White-Dove-With-Olive-Branch-White-Dove-Bird-Peace-PNG-Transparent-Image-and-Clipart-for.jpg">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="منبر الأحرار">
 
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#050505">
 
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "منبر الأحرار",
+      "applicationCategory": "CommunicationApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "منصة تواصل صوتي فوري بتقنية WebRTC تتيح للمستخدمين إنشاء غرف نقاش بحرية تامة."
+    }
+    </script>
 </head>
 <body>
 
-    <div class="bg-effect"></div>
+    <div class="bg-layer"></div>
 
     <div class="install-popup-overlay" id="install-popup">
         <div class="install-card">
             <img src="https://i.postimg.cc/g0KcyDsw/Elegant-White-Dove-With-Olive-Branch-White-Dove-Bird-Peace-PNG-Transparent-Image-and-Clipart-for.jpg" class="install-logo" alt="Logo">
             <h3 class="install-title">تثبيت التطبيق</h3>
-            <p class="install-desc">قم بتثبيت منبر الأحرار لتجربة أفضل</p>
-            <button class="btn-install" onclick="triggerInstall()">تثبيت الآن</button>
-            <button class="btn-close-install" onclick="closeInstallPopup()">ليس الآن</button>
+            <p class="install-desc">تجربة أفضل، وصول أسرع.</p>
+            <button class="btn-install" onclick="triggerInstall()">تثبيت</button>
+            <button class="btn-close-install" onclick="closeInstallPopup()">إغلاق</button>
         </div>
     </div>
 
     <div class="app-view active" id="v-home">
         <div class="home-content">
-            <div class="freedom-icon"><i class="fas fa-dove"></i></div>
-            <h1>منبر الأحرار</h1>
-            <div class="slogan">تكلم بحرية</div>
-            <p class="sub-text" id="id-text">جاري التحميل...</p>
-
-            <div class="main-btn" id="btn-rejoin" onclick="rejoinLastRoom()">
-                <div class="text-box">
-                    <h3>غرفتك السابقة</h3>
-                    <p id="last-room-txt">العودة للمساحة الأخيرة</p>
-                </div>
-                <div style="width:40px; height:40px; background:#222; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-history"></i></div>
+            <div class="logo-container">
+                <div class="freedom-icon"><i class="fas fa-dove"></i></div>
             </div>
+            <h1>منبر الأحرار</h1>
+            <div class="slogan">صوت الحقيقة</div>
+            <div class="id-badge" id="id-text">جاري الاتصال...</div>
 
-            <div class="main-btn" onclick="createNewRoom()">
-                <div class="text-box">
-                    <h3>مساحة جديدة</h3>
-                    <p>بدء نقاش جديد كلياً</p>
+            <div class="action-buttons">
+                <div class="main-btn" id="btn-rejoin" onclick="rejoinLastRoom()">
+                    <div class="icon-box"><i class="fas fa-history"></i></div>
+                    <div class="text-box">
+                        <h3>العودة للغرفة</h3>
+                        <p id="last-room-txt">استكمال النقاش</p>
+                    </div>
                 </div>
-                <div style="width:40px; height:40px; background:#222; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-plus"></i></div>
+
+                <div class="main-btn highlight" onclick="createNewRoom()">
+                    <div class="icon-box"><i class="fas fa-microphone-lines"></i></div>
+                    <div class="text-box">
+                        <h3>مساحة جديدة</h3>
+                        <p>ابدأ البث الآن</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="app-view" id="v-room">
         <div class="room-header">
-            <div class="live-badge"><i class="fas fa-circle" style="font-size: 8px; color: var(--gold); margin-left:5px;"></i> مباشر</div>
-            <button class="copy-btn" onclick="openShareSheet()">دعوة الأصدقاء</button>
+            <div class="live-indicator">
+                <span class="pulse-dot"></span> مباشر
+            </div>
+            <button class="header-btn" onclick="openShareSheet()"><i class="fas fa-share-nodes"></i></button>
         </div>
 
         <div class="grid-container" id="grid"></div>
 
         <div class="filter-menu" id="filter-menu">
             <div class="filter-opt selected" onclick="applyFilter('none', this)">طبيعي</div>
-            <div class="filter-opt" onclick="applyFilter('deep', this)">وقور</div>
-            <div class="filter-opt" onclick="applyFilter('echo', this)">صدى</div>
+            <div class="filter-opt" onclick="applyFilter('deep', this)">إذاعي</div>
+            <div class="filter-opt" onclick="applyFilter('echo', this)">قاعة</div>
         </div>
 
-        <div class="dock">
-            <button class="dock-btn active" id="mic-btn" onclick="toggleMic()"><i class="fas fa-microphone"></i></button>
-            <button class="dock-btn danger" onclick="exitToMenu()"><i class="fas fa-times"></i></button>
-            <button class="dock-btn" onclick="toggleFilters()"><i class="fas fa-sliders-h"></i></button>
+        <div class="dock-container">
+            <div class="dock">
+                <button class="dock-btn active" id="mic-btn" onclick="toggleMic()"><i class="fas fa-microphone"></i></button>
+                <button class="dock-btn danger" onclick="exitToMenu()"><i class="fas fa-phone-slash"></i></button>
+                <button class="dock-btn" onclick="toggleFilters()"><i class="fas fa-sliders"></i></button>
+            </div>
         </div>
         
         <div id="audio-container"></div>
@@ -83,35 +113,35 @@
 
     <div class="share-overlay" id="share-overlay" onclick="closeShareSheet()"></div>
     <div class="share-sheet" id="share-sheet">
-        <div style="width: 40px; height: 5px; background: #333; border-radius: 10px; margin: 0 auto 30px;"></div>
-        <h3 class="share-title">مشاركة المساحة</h3>
+        <div class="sheet-handle"></div>
+        <h3 class="share-title">دعوة للنقاش</h3>
         <div class="share-grid">
             <div class="share-item" onclick="shareTo('whatsapp')">
                 <div class="share-icon whatsapp"><i class="fab fa-whatsapp"></i></div>
-                <span class="share-label">واتساب</span>
+                <span>واتساب</span>
             </div>
             <div class="share-item" onclick="shareTo('telegram')">
                 <div class="share-icon telegram"><i class="fab fa-telegram-plane"></i></div>
-                <span class="share-label">تليجرام</span>
+                <span>تيليجرام</span>
             </div>
             <div class="share-item" onclick="shareTo('facebook')">
                 <div class="share-icon facebook"><i class="fab fa-facebook-f"></i></div>
-                <span class="share-label">فيسبوك</span>
+                <span>فيسبوك</span>
             </div>
             <div class="share-item" onclick="copyLinkAction()">
                 <div class="share-icon copy-link-item"><i class="fas fa-link"></i></div>
-                <span class="share-label">نسخ</span>
+                <span>نسخ</span>
             </div>
         </div>
     </div>
 
     <div class="audio-gate" id="audio-gate">
-        <div style="width: 80px; height: 80px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-            <i class="fas fa-microphone-alt" style="color: black; font-size: 2rem;"></i>
+        <div class="gate-content">
+            <div class="gate-icon"><i class="fas fa-headphones-simple"></i></div>
+            <h2>تأكيد الدخول</h2>
+            <p>الميكروفون مطلوب للمشاركة في الحوار</p>
+            <button class="gate-btn" onclick="confirmEntry()">دخول الغرفة</button>
         </div>
-        <h2 style="color: white; margin-bottom: 10px;">تفعيل الصوت</h2>
-        <p style="color: #888; font-size: 0.9rem; margin-bottom: 30px;">يجب الضغط للسماح بسماع الآخرين</p>
-        <button onclick="confirmEntry()" style="width: 200px; padding: 15px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer;">دخول الآن</button>
     </div>
 
     <div class="toast-container" id="toast-container"></div>
