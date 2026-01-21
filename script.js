@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, update, onValue, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, update, onValue, remove, onDisconnect, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjE-2q6PONBkCin9ZN22gDp9Q8pAH9ZW8",
@@ -26,6 +26,8 @@ let isMuted = false;
 let calls = {};
 let roomRef = null;
 let deferredPrompt;
+let roomOwnerId = null;
+let knownPeers = new Set();
 
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(console.log); }
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('install-popup').classList.add('show'); });
@@ -43,7 +45,6 @@ window.closeInstallPopup = () => document.getElementById('install-popup').classL
 window.onload = () => {
     document.getElementById('id-text').innerHTML = `معرفك: ${user.code}`;
     const urlRoom = new URLSearchParams(location.search).get('room');
-    
     if(urlRoom) { 
         activeRoom = urlRoom; 
         localStorage.setItem('last_room', activeRoom); 
@@ -69,17 +70,13 @@ function updateUI() {
 let toastTimeout;
 window.showToast = (msg) => {
     const container = document.getElementById('toast-container');
-    
     container.innerHTML = '';
     clearTimeout(toastTimeout);
-
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerText = msg;
     container.appendChild(toast);
-    
     requestAnimationFrame(() => toast.classList.add('show'));
-    
     toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => { if(toast.parentElement) toast.remove(); }, 200);
@@ -109,12 +106,17 @@ window.shareTo = (platform) => {
 window.createNewRoom = () => { 
     activeRoom = Math.random().toString(36).substr(2, 6).toUpperCase(); 
     localStorage.setItem('last_room', activeRoom); 
+    set(ref(db, `rooms/${activeRoom}/owner`), user.id);
     document.getElementById('audio-gate').classList.add('show'); 
 };
+
 window.rejoinLastRoom = () => { 
     activeRoom = localStorage.getItem('last_room'); 
     document.getElementById('audio-gate').classList.add('show'); 
 };
+
+const joinSound = new Audio("data:audio/mp3;base64,//uQRAAAAWMSLwUIYAPAAAAAAAAAAAAAFhpZgAAgiXYAD//uQRAAAAWMSLwUIYAPAAAAAAAAAAAAAFhpZgAAgiXYAD//uQRAAAAWMSLwUIYAPAAAAAAAAAAAAAFhpZgAAgiXYAD//uQZAAAAzgLgAAAAABBQAAABCRU5E");
+joinSound.volume = 0.5;
 
 window.confirmEntry = async () => {
     try {
@@ -123,9 +125,10 @@ window.confirmEntry = async () => {
         
         localStream = await navigator.mediaDevices.getUserMedia({ 
             audio: { 
-                echoCancellation: true, 
-                noiseSuppression: true,
-                autoGainControl: true
+                echoCancellation: { ideal: true },
+                noiseSuppression: { ideal: true },
+                autoGainControl: { ideal: true },
+                channelCount: 1
             },
             video: false 
         });
@@ -135,31 +138,14 @@ window.confirmEntry = async () => {
         audioSource.connect(audioDestination);
         
         const peerConfig = {
+            debug: 0,
             config: {
                 iceServers: [
-                  {
-                    urls: "stun:stun.relay.metered.ca:80",
-                  },
-                  {
-                    urls: "turn:global.relay.metered.ca:80",
-                    username: "14d6a892afc9dbe41c8e0de2",
-                    credential: "jWoQ1RL0jVlh/dNY",
-                  },
-                  {
-                    urls: "turn:global.relay.metered.ca:80?transport=tcp",
-                    username: "14d6a892afc9dbe41c8e0de2",
-                    credential: "jWoQ1RL0jVlh/dNY",
-                  },
-                  {
-                    urls: "turn:global.relay.metered.ca:443",
-                    username: "14d6a892afc9dbe41c8e0de2",
-                    credential: "jWoQ1RL0jVlh/dNY",
-                  },
-                  {
-                    urls: "turns:global.relay.metered.ca:443?transport=tcp",
-                    username: "14d6a892afc9dbe41c8e0de2",
-                    credential: "jWoQ1RL0jVlh/dNY",
-                  }
+                  { urls: "stun:stun.relay.metered.ca:80" },
+                  { urls: "turn:global.relay.metered.ca:80", username: "14d6a892afc9dbe41c8e0de2", credential: "jWoQ1RL0jVlh/dNY" },
+                  { urls: "turn:global.relay.metered.ca:80?transport=tcp", username: "14d6a892afc9dbe41c8e0de2", credential: "jWoQ1RL0jVlh/dNY" },
+                  { urls: "turn:global.relay.metered.ca:443", username: "14d6a892afc9dbe41c8e0de2", credential: "jWoQ1RL0jVlh/dNY" },
+                  { urls: "turns:global.relay.metered.ca:443?transport=tcp", username: "14d6a892afc9dbe41c8e0de2", credential: "jWoQ1RL0jVlh/dNY" }
                 ]
             }
         };
@@ -187,6 +173,10 @@ window.confirmEntry = async () => {
         document.getElementById('v-home').classList.remove('active');
         document.getElementById('v-room').classList.add('active');
         window.history.pushState({}, '', `?room=${activeRoom}`);
+        
+        knownPeers.clear();
+        knownPeers.add(user.id);
+
     } catch(e) { 
         console.error(e);
         showToast("يرجى السماح باستخدام المايكروفون"); 
@@ -198,8 +188,33 @@ function startRoom() {
     set(roomRef, { code: user.code, peerId: myPeerId, online: true, isMuted: false });
     onDisconnect(roomRef).remove();
 
+    get(ref(db, `rooms/${activeRoom}/owner`)).then((snap) => {
+        if(snap.exists()) {
+            roomOwnerId = snap.val();
+        } else {
+            set(ref(db, `rooms/${activeRoom}/owner`), user.id);
+            roomOwnerId = user.id;
+        }
+    });
+
     onValue(ref(db, `rooms/${activeRoom}/users`), (snap) => {
         const users = snap.val() || {};
+        
+        if (document.getElementById('v-room').classList.contains('active') && !users[user.id]) {
+            showToast("تم إخراجك من الغرفة");
+            setTimeout(exitToMenu, 1000);
+            return;
+        }
+
+        Object.keys(users).forEach(uid => {
+            if (!knownPeers.has(uid)) {
+                knownPeers.add(uid);
+                try {
+                    document.getElementById('join-sound').play().catch(e => console.log(e));
+                } catch(e) {}
+            }
+        });
+
         renderUsers(users);
         Object.values(users).forEach(u => {
             if(u.peerId !== myPeerId && !calls[u.peerId]) {
@@ -210,6 +225,14 @@ function startRoom() {
         });
     });
 }
+
+window.kickUser = (targetUserId) => {
+    if(confirm("هل أنت متأكد من طرد هذا المستخدم؟")) {
+        remove(ref(db, `rooms/${activeRoom}/users/${targetUserId}`))
+        .then(() => showToast("تم طرد المستخدم"))
+        .catch(e => console.error(e));
+    }
+};
 
 function handleRemoteStream(stream, peerId) {
     let audio = document.getElementById('audio-' + peerId);
@@ -222,11 +245,19 @@ function handleRemoteStream(stream, peerId) {
     }
     audio.srcObject = stream;
     
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("Audio play failed, retrying...");
+        });
+    }
+
     try {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
         const remoteCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = remoteCtx.createMediaStreamSource(stream);
         monitorVolume(source, peerId, remoteCtx);
-    } catch(e) { console.log("Audio monitoring error", e); }
+    } catch(e) { console.log(e); }
 }
 
 function monitorVolume(source, id, context) {
@@ -254,15 +285,21 @@ function monitorVolume(source, id, context) {
 function renderUsers(users) {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
-    const list = Object.values(users);
+    const list = Object.entries(users);
     grid.className = 'grid-container ' + (list.length <= 1 ? 'layout-1' : list.length === 2 ? 'layout-2' : 'layout-more');
     
-    list.forEach(u => {
+    const isOwner = (user.id === roomOwnerId);
+
+    list.forEach(([uid, u]) => {
         const isMe = u.peerId === myPeerId;
         const muteBadge = u.isMuted ? '<div class="mute-badge"><i class="fas fa-microphone-slash"></i></div>' : '';
         
+        const kickBtn = (isOwner && !isMe) ? 
+            `<div class="kick-btn" onclick="kickUser('${uid}')"><i class="fas fa-times"></i></div>` : '';
+
         grid.innerHTML += `
             <div class="user-card">
+                ${kickBtn}
                 <div class="card-avatar">
                     ${u.code}
                     ${muteBadge}
@@ -281,10 +318,7 @@ function renderUsers(users) {
 window.toggleMic = () => {
     isMuted = !isMuted;
     if(localStream) localStream.getAudioTracks()[0].enabled = !isMuted;
-    
-    if(roomRef) {
-        update(roomRef, { isMuted: isMuted });
-    }
+    if(roomRef) { update(roomRef, { isMuted: isMuted }); }
 
     const btn = document.getElementById('mic-btn');
     if(isMuted) {
