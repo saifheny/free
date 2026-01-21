@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, update, onValue, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjE-2q6PONBkCin9ZN22gDp9Q8pAH9ZW8",
@@ -43,7 +43,12 @@ window.closeInstallPopup = () => document.getElementById('install-popup').classL
 window.onload = () => {
     document.getElementById('id-text').innerHTML = `معرفك: ${user.code}`;
     const urlRoom = new URLSearchParams(location.search).get('room');
-    if(urlRoom) { activeRoom = urlRoom; document.getElementById('audio-gate').classList.add('show'); }
+    
+    if(urlRoom) { 
+        activeRoom = urlRoom; 
+        localStorage.setItem('last_room', activeRoom); 
+        document.getElementById('audio-gate').classList.add('show'); 
+    }
     updateUI();
 };
 
@@ -61,17 +66,24 @@ function updateUI() {
     }
 }
 
+let toastTimeout;
 window.showToast = (msg) => {
     const container = document.getElementById('toast-container');
+    
+    container.innerHTML = '';
+    clearTimeout(toastTimeout);
+
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerText = msg;
     container.appendChild(toast);
+    
     requestAnimationFrame(() => toast.classList.add('show'));
-    setTimeout(() => {
+    
+    toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-    }, 3000);
+        setTimeout(() => { if(toast.parentElement) toast.remove(); }, 200);
+    }, 2500);
 };
 
 window.openShareSheet = () => { document.getElementById('share-overlay').classList.add('show'); document.getElementById('share-sheet').classList.add('show'); };
@@ -94,8 +106,15 @@ window.shareTo = (platform) => {
     closeShareSheet();
 };
 
-window.createNewRoom = () => { activeRoom = Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('last_room', activeRoom); document.getElementById('audio-gate').classList.add('show'); };
-window.rejoinLastRoom = () => { activeRoom = localStorage.getItem('last_room'); document.getElementById('audio-gate').classList.add('show'); };
+window.createNewRoom = () => { 
+    activeRoom = Math.random().toString(36).substr(2, 6).toUpperCase(); 
+    localStorage.setItem('last_room', activeRoom); 
+    document.getElementById('audio-gate').classList.add('show'); 
+};
+window.rejoinLastRoom = () => { 
+    activeRoom = localStorage.getItem('last_room'); 
+    document.getElementById('audio-gate').classList.add('show'); 
+};
 
 window.confirmEntry = async () => {
     try {
@@ -118,24 +137,29 @@ window.confirmEntry = async () => {
         const peerConfig = {
             config: {
                 iceServers: [
-                    {
-                        urls: "stun:global.stun.metered.ca:80"
-                    },
-                    {
-                        urls: "turn:global.turn.metered.ca:80",
-                        username: "0d88ae91be69f9ce1c4f15bd",
-                        credential: "Y93hDRuoReAdSajE"
-                    },
-                    {
-                        urls: "turn:global.turn.metered.ca:443",
-                        username: "0d88ae91be69f9ce1c4f15bd",
-                        credential: "Y93hDRuoReAdSajE"
-                    },
-                    {
-                        urls: "turn:global.turn.metered.ca:443?transport=tcp",
-                        username: "0d88ae91be69f9ce1c4f15bd",
-                        credential: "Y93hDRuoReAdSajE"
-                    }
+                  {
+                    urls: "stun:stun.relay.metered.ca:80",
+                  },
+                  {
+                    urls: "turn:global.relay.metered.ca:80",
+                    username: "14d6a892afc9dbe41c8e0de2",
+                    credential: "jWoQ1RL0jVlh/dNY",
+                  },
+                  {
+                    urls: "turn:global.relay.metered.ca:80?transport=tcp",
+                    username: "14d6a892afc9dbe41c8e0de2",
+                    credential: "jWoQ1RL0jVlh/dNY",
+                  },
+                  {
+                    urls: "turn:global.relay.metered.ca:443",
+                    username: "14d6a892afc9dbe41c8e0de2",
+                    credential: "jWoQ1RL0jVlh/dNY",
+                  },
+                  {
+                    urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                    username: "14d6a892afc9dbe41c8e0de2",
+                    credential: "jWoQ1RL0jVlh/dNY",
+                  }
                 ]
             }
         };
@@ -143,12 +167,21 @@ window.confirmEntry = async () => {
         peer = new Peer(user.id, peerConfig);
 
         peer.on('open', id => { myPeerId = id; startRoom(); });
+        
         peer.on('call', call => {
             call.answer(audioDestination.stream);
             call.on('stream', stream => handleRemoteStream(stream, call.peer));
             calls[call.peer] = call;
         });
-        peer.on('error', err => { console.error(err); showToast("خطأ في الاتصال"); });
+        
+        peer.on('error', err => { 
+            console.error(err); 
+            if(err.type === 'peer-unavailable') {
+                showToast("المستخدم غير متصل حالياً");
+            } else {
+                showToast("جاري محاولة إعادة الاتصال..."); 
+            }
+        });
 
         document.getElementById('audio-gate').classList.remove('show');
         document.getElementById('v-home').classList.remove('active');
@@ -156,13 +189,13 @@ window.confirmEntry = async () => {
         window.history.pushState({}, '', `?room=${activeRoom}`);
     } catch(e) { 
         console.error(e);
-        showToast("لا يمكن الوصول للميكروفون"); 
+        showToast("يرجى السماح باستخدام المايكروفون"); 
     }
 };
 
 function startRoom() {
     roomRef = ref(db, `rooms/${activeRoom}/users/${user.id}`);
-    set(roomRef, { code: user.code, peerId: myPeerId, online: true });
+    set(roomRef, { code: user.code, peerId: myPeerId, online: true, isMuted: false });
     onDisconnect(roomRef).remove();
 
     onValue(ref(db, `rooms/${activeRoom}/users`), (snap) => {
@@ -226,9 +259,14 @@ function renderUsers(users) {
     
     list.forEach(u => {
         const isMe = u.peerId === myPeerId;
+        const muteBadge = u.isMuted ? '<div class="mute-badge"><i class="fas fa-microphone-slash"></i></div>' : '';
+        
         grid.innerHTML += `
             <div class="user-card">
-                <div class="card-avatar">${u.code}</div>
+                <div class="card-avatar">
+                    ${u.code}
+                    ${muteBadge}
+                </div>
                 <div class="voice-wave-container" id="wave-${u.peerId}">
                     <div class="wave-bar"></div><div class="wave-bar"></div>
                     <div class="wave-bar"></div><div class="wave-bar"></div>
@@ -243,6 +281,11 @@ function renderUsers(users) {
 window.toggleMic = () => {
     isMuted = !isMuted;
     if(localStream) localStream.getAudioTracks()[0].enabled = !isMuted;
+    
+    if(roomRef) {
+        update(roomRef, { isMuted: isMuted });
+    }
+
     const btn = document.getElementById('mic-btn');
     if(isMuted) {
         btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
