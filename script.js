@@ -14,8 +14,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let user = JSON.parse(localStorage.getItem('vf_user')) || { id: 'u' + Math.random().toString(36).substr(2,9), code: Math.floor(100+Math.random()*900) };
-localStorage.setItem('vf_user', JSON.stringify(user));
+let user = JSON.parse(localStorage.getItem('vf_user'));
+if (!user) {
+    user = { id: 'u' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5), code: Math.floor(100 + Math.random() * 900) };
+    localStorage.setItem('vf_user', JSON.stringify(user));
+}
 
 let localStream, peer, myPeerId, activeRoom;
 let audioCtx, audioSource, audioDestination, currentFilter;
@@ -24,31 +27,21 @@ let calls = {};
 let roomRef = null;
 let deferredPrompt;
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('install-popup').classList.add('show');
-});
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(console.log); }
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('install-popup').classList.add('show'); });
 
 window.triggerInstall = async () => {
     if (deferredPrompt) {
         deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+        await deferredPrompt.userChoice;
         deferredPrompt = null;
         document.getElementById('install-popup').classList.remove('show');
     }
 };
-
-window.closeInstallPopup = () => {
-    document.getElementById('install-popup').classList.remove('show');
-};
+window.closeInstallPopup = () => document.getElementById('install-popup').classList.remove('show');
 
 window.onload = () => {
-    document.getElementById('id-text').innerHTML = `هويتك: <b>${user.code}</b>`;
+    document.getElementById('id-text').innerHTML = `معرفك: ${user.code}`;
     const urlRoom = new URLSearchParams(location.search).get('room');
     if(urlRoom) { activeRoom = urlRoom; document.getElementById('audio-gate').classList.add('show'); }
     updateUI();
@@ -57,8 +50,15 @@ window.onload = () => {
 function updateUI() {
     const last = localStorage.getItem('last_room');
     const btn = document.getElementById('btn-rejoin');
-    if(last) { btn.style.opacity = '1'; document.getElementById('last-room-txt').innerText = "غرفة: " + last; btn.onclick = rejoinLastRoom; }
-    else { btn.style.opacity = '0.5'; btn.onclick = null; }
+    if(last) { 
+        btn.style.opacity = '1'; 
+        btn.style.pointerEvents = 'all';
+        document.getElementById('last-room-txt').innerText = "غرفة: " + last; 
+        btn.onclick = rejoinLastRoom; 
+    } else { 
+        btn.style.opacity = '0.4'; 
+        btn.style.pointerEvents = 'none';
+    }
 }
 
 window.showToast = (msg) => {
@@ -67,7 +67,7 @@ window.showToast = (msg) => {
     toast.className = 'toast';
     toast.innerText = msg;
     container.appendChild(toast);
-    setTimeout(() => toast.classList.add('show'), 10);
+    requestAnimationFrame(() => toast.classList.add('show'));
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 400);
@@ -79,31 +79,38 @@ window.closeShareSheet = () => { document.getElementById('share-overlay').classL
 
 window.copyLinkAction = () => {
     const link = `${location.origin}${location.pathname}?room=${activeRoom}`;
-    navigator.clipboard.writeText(link).then(() => {
-        showToast("تم نسخ الرابط");
-        closeShareSheet();
-    });
+    navigator.clipboard.writeText(link).then(() => { showToast("تم نسخ رابط الغرفة"); closeShareSheet(); });
 };
 
 window.shareTo = (platform) => {
     const link = `${location.origin}${location.pathname}?room=${activeRoom}`;
-    const text = `انضم إلي في منبر الأحرار: `;
-    let url = '';
-    if(platform === 'whatsapp') url = `https://wa.me/?text=${encodeURIComponent(text + link)}`;
-    else if(platform === 'telegram') url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
-    else if(platform === 'facebook') url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
-    window.open(url, '_blank');
+    const text = `انضم للنقاش الصوتي المباشر على منبر الأحرار: `;
+    const urls = {
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(text + link)}`,
+        telegram: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`
+    };
+    if(urls[platform]) window.open(urls[platform], '_blank');
     closeShareSheet();
 };
 
-window.createNewRoom = () => { activeRoom = Math.random().toString(36).substr(2,8); localStorage.setItem('last_room', activeRoom); document.getElementById('audio-gate').classList.add('show'); };
+window.createNewRoom = () => { activeRoom = Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('last_room', activeRoom); document.getElementById('audio-gate').classList.add('show'); };
 window.rejoinLastRoom = () => { activeRoom = localStorage.getItem('last_room'); document.getElementById('audio-gate').classList.add('show'); };
 
 window.confirmEntry = async () => {
     try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if(audioCtx.state === 'suspended') await audioCtx.resume();
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+        
+        localStream = await navigator.mediaDevices.getUserMedia({ 
+            audio: { 
+                echoCancellation: true, 
+                noiseSuppression: true,
+                autoGainControl: true
+            },
+            video: false 
+        });
+
         audioSource = audioCtx.createMediaStreamSource(localStream);
         audioDestination = audioCtx.createMediaStreamDestination();
         audioSource.connect(audioDestination);
@@ -111,13 +118,25 @@ window.confirmEntry = async () => {
         const peerConfig = {
             config: {
                 iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' },
-                    { urls: 'stun:stun4.l.google.com:19302' }
-                ],
-                sdpSemantics: 'unified-plan'
+                    {
+                        urls: "stun:global.stun.metered.ca:80"
+                    },
+                    {
+                        urls: "turn:global.turn.metered.ca:80",
+                        username: "0d88ae91be69f9ce1c4f15bd",
+                        credential: "Y93hDRuoReAdSajE"
+                    },
+                    {
+                        urls: "turn:global.turn.metered.ca:443",
+                        username: "0d88ae91be69f9ce1c4f15bd",
+                        credential: "Y93hDRuoReAdSajE"
+                    },
+                    {
+                        urls: "turn:global.turn.metered.ca:443?transport=tcp",
+                        username: "0d88ae91be69f9ce1c4f15bd",
+                        credential: "Y93hDRuoReAdSajE"
+                    }
+                ]
             }
         };
 
@@ -127,18 +146,23 @@ window.confirmEntry = async () => {
         peer.on('call', call => {
             call.answer(audioDestination.stream);
             call.on('stream', stream => handleRemoteStream(stream, call.peer));
+            calls[call.peer] = call;
         });
-        peer.on('error', err => console.log(err));
+        peer.on('error', err => { console.error(err); showToast("خطأ في الاتصال"); });
 
         document.getElementById('audio-gate').classList.remove('show');
         document.getElementById('v-home').classList.remove('active');
         document.getElementById('v-room').classList.add('active');
-    } catch(e) { showToast("يرجى السماح باستخدام الميكروفون"); }
+        window.history.pushState({}, '', `?room=${activeRoom}`);
+    } catch(e) { 
+        console.error(e);
+        showToast("لا يمكن الوصول للميكروفون"); 
+    }
 };
 
 function startRoom() {
     roomRef = ref(db, `rooms/${activeRoom}/users/${user.id}`);
-    set(roomRef, { code: user.code, peerId: myPeerId });
+    set(roomRef, { code: user.code, peerId: myPeerId, online: true });
     onDisconnect(roomRef).remove();
 
     onValue(ref(db, `rooms/${activeRoom}/users`), (snap) => {
@@ -165,14 +189,17 @@ function handleRemoteStream(stream, peerId) {
     }
     audio.srcObject = stream;
     
-    const remoteCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = remoteCtx.createMediaStreamSource(stream);
-    monitorVolume(source, peerId);
+    try {
+        const remoteCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = remoteCtx.createMediaStreamSource(stream);
+        monitorVolume(source, peerId, remoteCtx);
+    } catch(e) { console.log("Audio monitoring error", e); }
 }
 
-function monitorVolume(source, id) {
-    const analyser = (source.context || audioCtx).createAnalyser();
-    analyser.fftSize = 32;
+function monitorVolume(source, id, context) {
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 64;
+    analyser.smoothingTimeConstant = 0.5;
     source.connect(analyser);
     const data = new Uint8Array(analyser.frequencyBinCount);
     
@@ -183,11 +210,8 @@ function monitorVolume(source, id) {
         
         const waveContainer = document.getElementById('wave-' + id);
         if(waveContainer) {
-            if(vol > 15) {
-                waveContainer.classList.add('speaking');
-            } else {
-                waveContainer.classList.remove('speaking');
-            }
+            if(vol > 10) waveContainer.classList.add('speaking');
+            else waveContainer.classList.remove('speaking');
         }
         requestAnimationFrame(check);
     };
@@ -205,64 +229,43 @@ function renderUsers(users) {
         grid.innerHTML += `
             <div class="user-card">
                 <div class="card-avatar">${u.code}</div>
-                
                 <div class="voice-wave-container" id="wave-${u.peerId}">
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div><div class="wave-bar"></div>
+                    <div class="wave-bar"></div><div class="wave-bar"></div>
                 </div>
-
-                <div style="font-size:0.75rem; color:#888; margin-top:5px;">${isMe ? 'أنت' : 'مشارك'}</div>
+                <div style="font-size:0.75rem; color:#666; margin-top:10px; font-weight:600;">${isMe ? 'أنت' : 'متحدث'}</div>
             </div>
         `;
     });
-    if(audioSource) monitorVolume(audioSource, myPeerId);
+    if(audioSource) monitorVolume(audioSource, myPeerId, audioCtx);
 }
 
 window.toggleMic = () => {
     isMuted = !isMuted;
-    localStream.getAudioTracks()[0].enabled = !isMuted;
+    if(localStream) localStream.getAudioTracks()[0].enabled = !isMuted;
     const btn = document.getElementById('mic-btn');
-    btn.innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
-    btn.style.background = isMuted ? '#444' : '#fff';
-    btn.style.color = isMuted ? '#fff' : '#000';
-    showToast(isMuted ? "تم كتم الميكروفون" : "الميكروفون يعمل");
+    if(isMuted) {
+        btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        btn.classList.remove('active');
+    } else {
+        btn.innerHTML = '<i class="fas fa-microphone"></i>';
+        btn.classList.add('active');
+    }
+    showToast(isMuted ? "تم كتم الصوت" : "أنت متصل الآن");
 };
 
 window.exitToMenu = () => {
     window.open('https://www.effectivegatecpm.com/k8fisnjjc?key=afa7ea920578f74cea5997d670bbe78e', '_blank');
 
-    if (roomRef) {
-        remove(roomRef);
-        roomRef = null;
-    }
-
-    if(localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
-    }
-
-    if (peer) {
-        peer.destroy();
-        peer = null;
-    }
-
-    calls = {};
-    myPeerId = null;
-    activeRoom = null;
-    isMuted = false;
+    if (roomRef) remove(roomRef);
+    if(localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    if (peer) { peer.destroy(); peer = null; }
     
+    calls = {}; myPeerId = null; activeRoom = null; isMuted = false;
     document.getElementById('audio-container').innerHTML = '';
-
+    
     document.getElementById('v-room').classList.remove('active');
     document.getElementById('v-home').classList.add('active');
-    
-    const btn = document.getElementById('mic-btn');
-    btn.innerHTML = '<i class="fas fa-microphone"></i>';
-    btn.style.background = '#fff';
-    btn.style.color = '#000';
-
     window.history.replaceState({}, document.title, window.location.pathname);
     updateUI();
 };
@@ -275,21 +278,21 @@ window.applyFilter = (type, el) => {
     document.getElementById('filter-menu').classList.remove('show');
     
     audioSource.disconnect();
-    if(currentFilter) currentFilter.disconnect();
+    if(currentFilter) { currentFilter.disconnect(); currentFilter = null; }
     
     if(type === 'none') {
         audioSource.connect(audioDestination);
     } else if(type === 'deep') {
-        const f = audioCtx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 500;
+        const f = audioCtx.createBiquadFilter(); 
+        f.type = 'lowshelf'; f.frequency.value = 200; f.gain.value = 10;
         audioSource.connect(f); f.connect(audioDestination); currentFilter = f;
     } else if(type === 'echo') {
-        const delay = audioCtx.createDelay(); delay.delayTime.value = 0.3;
-        const feedback = audioCtx.createGain(); feedback.gain.value = 0.3;
+        const delay = audioCtx.createDelay(); delay.delayTime.value = 0.15;
+        const feedback = audioCtx.createGain(); feedback.gain.value = 0.2;
         delay.connect(feedback); feedback.connect(delay);
-        
         audioSource.connect(audioDestination);
         audioSource.connect(delay); delay.connect(audioDestination);
         currentFilter = delay;
     }
-    showToast("تم تحديث الفلتر");
+    showToast("تم تفعيل الفلتر");
 };
